@@ -18,7 +18,14 @@ const booksApi = createApi({
     tagTypes: ['Books'],
     endpoints: (builder) =>({
         fetchAllBooks: builder.query({
-            query: ({page=1,pageSize=20}) => `/?page=${page}&pageSize=${pageSize}`,
+            query: ({ page = 1, pageSize = 20, genre, status }) => {
+            const params = new URLSearchParams();
+            params.set("page", page);
+            params.set("pageSize", pageSize);
+            if (genre) params.set("genre", genre);
+            if (status) params.set("status", status);
+            return `/?${params.toString()}`;
+        },
             providesTags: ["Books"]
         }),
         fetchBookById: builder.query({

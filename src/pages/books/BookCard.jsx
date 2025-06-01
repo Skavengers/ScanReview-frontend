@@ -1,9 +1,8 @@
 import React from 'react'
 import { getImgUrl } from '../../utils/getImgUrl'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { FaFire } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa";
-
 import { useDispatch } from'react-redux'
 import { addToCart } from '../../redux/features/cart/cartSlice'
 
@@ -59,13 +58,16 @@ const BookCard = ({book, isTierList=true}) => {
                           </button>
                         </div>
       
-                          : <p className="sm:ml-4">{book.meta?.publication_period}</p> 
+                          : <p className="absolute top-15 right-2 mt-2 mr-2 text-sm text-gray-500">{book.meta?.publication_period}</p>
                         }
                         
                       </div>
                       <p className="mt-1 text-sm text-gray-500 capitalize"><strong>Category:</strong>
-                        { (book.genres ?? []).map((g, i) => (
-                          <span key={i}>{g}{i < book?.genres.length - 1 ? ', ' : ''}</span>
+                        {(book.genres ?? []).slice(0, 6).map((g, i, array) => (
+                          <span key={i}>
+                            {g}
+                            {i < array.length - 1 ? ', ' : ''}
+                          </span>
                         ))}
                       </p>
                     </div>
