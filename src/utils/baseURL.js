@@ -1,8 +1,8 @@
 const getBaseUrl = () => {
-    return "https://scan-review-backend.vercel.app"
+    return "http://localhost:5173/"
 }
 
 export default getBaseUrl;
-/**http://localhost:5173/ 
- * 
+/** 
+ * https://scan-review-backend.vercel.app
 */
