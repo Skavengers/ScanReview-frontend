@@ -14,7 +14,8 @@ import { useFetchAllBooksQuery } from '../../redux/features/books/booksApi';
 
 
 const Recommended = () => {
-  const {data: books =[]} = useFetchAllBooksQuery();
+  const [page,setPage] = useState(1);
+  const {data: books =[]} = useFetchAllBooksQuery({page, pageSize: 10});
   
   return (
     <div className='py-10'>

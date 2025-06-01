@@ -2,10 +2,10 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 import news1 from "../../assets/news/news-1.png"
-import news2 from "../../assets/news/news-2.png"
-import news3 from "../../assets/news/news-3.png"
-import news4 from "../../assets/news/news-4.png"
-
+import news2 from "../../assets/news/news-2.webp"
+import news3 from "../../assets/news/news-3.jpg"
+import news4 from "../../assets/news/news-4.webp"
+import news5 from "../../assets/news/news-5.webp"
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -21,33 +21,33 @@ import 'swiper/css/navigation';
 const news = [
     {
         "id": 1,
-        "title": "Global Climate Summit Calls for Urgent Action",
-        "description": "World leaders gather at the Global Climate Summit to discuss urgent strategies to combat climate change, focusing on reducing carbon emissions and fostering renewable energy solutions.",
+        "title": "Industry Concerns Over AI Policies",
+        "description": "Manhwa creators and publishers are taking drastic measures to protect their works from AI due to new policies by X (formerly Twitter). These policies allow third-party collaborators to use data to train AI models, leading studios like D&C Media to alter their content to confuse AI algorithms while maintaining visual quality for human viewers.",
         "image": news1
     },
     {
         "id": 2,
-        "title": "Breakthrough in AI Technology Announced",
-        "description": "A major breakthrough in artificial intelligence has been announced by researchers, with new advancements promising to revolutionize industries from healthcare to finance.",
+        "title": "Anime Adaptations",
+        "description": "Line Manga plans to launch 20 webtoon anime adaptations in 2025, building on the success of series like Solo Leveling and Tower of God. This reflects a growing trend in adapting manhwa into anime.",
         "image": news2
     },
     {
         "id": 3,
-        "title": "New Space Mission Aims to Explore Distant Galaxies",
-        "description": "NASA has unveiled plans for a new space mission that will aim to explore distant galaxies, with hopes of uncovering insights into the origins of the universe.",
+        "title": "WEBTOON Shop Launch",
+        "description": "WEBTOON Entertainment has introduced the WEBTOON Shop, offering merchandise for popular webtoons, enhancing fan engagement and accessibility.",
         "image": news3
     },
     {
         "id": 4,
-        "title": "Stock Markets Reach Record Highs Amid Economic Recovery",
-        "description": "Global stock markets have reached record highs as signs of economic recovery continue to emerge following the challenges posed by the global pandemic.",
+        "title": "Solo Leveling: Ragnarok Hiatus",
+        "description": "The web novel Solo Leveling: Ragnarok is on a one-month hiatus. This follows the release of Chapter 36 and is due to the author's need for further medical treatment after a car accident. The hiatus has been extended until the end of January 2025.",
         "image": news4
     },
     {
         "id": 5,
-        "title": "Innovative New Smartphone Released by Leading Tech Company",
-        "description": "A leading tech company has released its latest smartphone model, featuring cutting-edge technology, improved battery life, and a sleek new design.",
-        "image": news2
+        "title": "Roxana Creator Health and Future Plans",
+        "description": "The creator of Roxana has faced significant personal and health issues, which have impacted the continuation of the series. They have expressed a commitment to return after addressing these health concerns, indicating that while the series is on a hiatus, it is not permanently discontinued.",
+        "image": news5
     }
 ]
 
@@ -80,24 +80,28 @@ const News = () => {
         {
             news.map((item, index) => (
                 <SwiperSlide key={index}>
-                    <div className='flex flex-col sm:flex-row sm:justify-between items-center'>
-                        {/**Content */}
-                        <div className='py-4'>
-                            <Link to="/">
-                            <h3 className='text-lg font-medium hover:text-blue-500 mb-4'>{item.title}</h3>
-                            </Link>
-                        </div>
-                        <div className='w-12 h-[4px] bg-primary mb-5'></div>
-                        <p className='text-sm text-gray-600'>
-                            {item.description}
-                        </p>
-                        
-                        <div className='flex-shrink-0'>
-                            <img src={item.image} alt="" className='w-full object-covered'/>
-                        </div>
+                  <div className='flex flex-col sm:flex-row sm:justify-between items-center'>
+                    {/* Content */}
+                    <div className='py-4'>
+                      <Link to="/">
+                        <h3 className='text-lg font-medium hover:text-blue-500 mb-4'>{item.title}</h3>
+                      </Link>
+                      <div className='w-12 h-[4px] bg-primary mb-5'></div>
+                      <p className='text-sm text-gray-600'>
+                        {item.description}
+                      </p>
                     </div>
-                </SwiperSlide>
 
+                    {/* Image Container with Fixed Size */}
+                    <div className='flex-shrink-0 w-64 h-48 overflow-hidden'>
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className='w-full h-full object-cover'
+                      />
+                    </div>
+                  </div>
+                </SwiperSlide>
             ))
         }
       </Swiper>

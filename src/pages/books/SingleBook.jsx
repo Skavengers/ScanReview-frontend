@@ -26,28 +26,30 @@ const SingleBook = () => {
             <div className=''>
                 <div>
                     <img
-                        src={`${getImgUrl(book.coverImage)}`}
-                        alt={book.main_title}
+                        src={`${getImgUrl(book.picture_url)}`}
+                        alt={book.title}
                         className="mb-8"
                     />
                 </div>
 
                 <div className='mb-5'>
-                    <p className="text-gray-700 mb-2"><strong>Author:</strong> {book.authors || 'admin'}</p>
+                    <p className="text-gray-700 mb-2"><strong>Author:</strong> {book?.authors || '?'}</p>
                     <p className="text-gray-700 mb-4">
-                        <strong>Published:</strong> {new Date(book?.createdAt).toLocaleDateString()}
+                        <strong>Published:</strong> {book.meta?.status || "N/A"/*.toLocaleDateString()*/}
                     </p>
                     <p className="text-gray-700 mb-4 capitalize">
-                        <strong>Category:</strong> {book?.genre}
+                        <strong>Category:</strong> {book?.genres}
                     </p>
-                    <p className="text-gray-700"><strong>Description:</strong> {book.description}</p>
+                    <p className="text-gray-700"><strong>Description:</strong> {book?.description}</p>
                 </div>
 
+                {/*
                 <button onClick={() => handleAddToCart(book)} className="btn-primary px-6 space-x-1 flex items-center gap-1 ">
                     <FiShoppingCart className="" />
                     <span>Add to Cart</span>
 
                 </button>
+                */}
             </div>
         </div>
   )

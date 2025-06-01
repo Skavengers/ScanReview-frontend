@@ -36,7 +36,7 @@ const BookCard = ({book, isTierList=true}) => {
                   <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                     <img
                       alt=""
-                      src={`${getImgUrl(book?._id)}`}
+                      src={`${getImgUrl(book.title)}`}
                       className="h-full w-full object-cover object-center"
                     />
                   </div>
@@ -59,14 +59,18 @@ const BookCard = ({book, isTierList=true}) => {
                           </button>
                         </div>
       
-                          : <p className="sm:ml-4">{book.Ongoing ? "Ongoing" : "Complet"}</p> 
+                          : <p className="sm:ml-4">{book.meta?.publication_period}</p> 
                         }
                         
                       </div>
-                      <p className="mt-1 text-sm text-gray-500 capitalize"><strong>Category:</strong> { book.genres.map((g,i) =>(<span key={i}>{g}{i < book.genres.length - 1 ? ', ' : ''}</span>)) }</p>
+                      <p className="mt-1 text-sm text-gray-500 capitalize"><strong>Category:</strong>
+                        { (book.genres ?? []).map((g, i) => (
+                          <span key={i}>{g}{i < book?.genres.length - 1 ? ', ' : ''}</span>
+                        ))}
+                      </p>
                     </div>
                     <div className="flex flex-1 flex-wrap items-end justify-between space-y-2 text-sm">
-                      <p className="text-gray-500"><strong>Origin:</strong> {book.origin_country}</p>
+                      <p className="text-gray-500"><strong>Origin:</strong> {book?.origin_country}</p>
 
                       <div className="flex">
                         <button type="button" className="font-medium text-indigo-600 hover:text-indigo-500">
@@ -86,7 +90,7 @@ const BookCard = ({book, isTierList=true}) => {
       <div className="flex justify-between text-base font-medium text-gray-900">
         <p>Descriptions</p>
       </div>
-      <p className="mt-0.5 text-sm text-gray-500">{book.description.length > 200 ? `${book.description.slice(0,200)}...` : book.description}</p>
+      <p className="mt-0.5 text-sm text-gray-500">{book.description.length > 200 ? `${book?.description.slice(0,200)}...` : book.description}</p>
 
     </div>
     </div>

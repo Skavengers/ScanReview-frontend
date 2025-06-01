@@ -18,7 +18,7 @@ const booksApi = createApi({
     tagTypes: ['Books'],
     endpoints: (builder) =>({
         fetchAllBooks: builder.query({
-            query: () => "/",
+            query: ({page=1,pageSize=20}) => `/?page=${page}&pageSize=${pageSize}`,
             providesTags: ["Books"]
         }),
         fetchBookById: builder.query({
