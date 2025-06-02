@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 const ManageBooks = () => {
     const navigate = useNavigate();
 
-    const {data: books, refetch} = useFetchAllBooksQuery()
+    const {data: books, refetch} = useFetchAllBooksQuery({page:1,pageSize:50})
 
     const [deleteBook] = useDeleteBookMutation()
 
@@ -25,6 +25,7 @@ const ManageBooks = () => {
     const handleEditClick = (id) => {
         navigate(`dashboard/edit-book/${id}`);
     };
+    //console.log(books)
   return (
     <section className="py-1 bg-blueGray-50">
     <div className="w-full xl:w-8/12 mb-12 xl:mb-0 px-4 mx-auto mt-24">
@@ -66,20 +67,19 @@ const ManageBooks = () => {
                         {
                             books && books.map((book, index) => (
                                 <tr key={index}>
-                                <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blueGray-700 ">
+                                <th className="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blueGray-700 ">
                                    {index + 1}
                                 </th>
-                                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 ">
-                                    {book.main_title}
+                                <td className="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs p-4 break-words whitespace-normal">
+                                  {book.title}
                                 </td>
-                                <td className="border-t-0 px-6 align-center border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-                                  {book.category}
+                                <td className="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs p-4 break-words whitespace-normal">
+                                  {book.genres}
                                 </td>
-                                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
-
-                                    ${book.newPrice}
+                                <td className="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
+                                    {book.meta.status } / {book.meta.publication_period}
                                 </td>
-                                <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 space-x-4">
+                                <td className="border-t-0 px-3 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 space-x-4">
 
                                     <Link to={`/dashboard/edit-book/${book._id}`} className="font-medium text-indigo-600 hover:text-indigo-700 mr-2 hover:underline underline-offset-2">
                                         Edit
@@ -91,8 +91,6 @@ const ManageBooks = () => {
                             </tr> 
                             ))
                         }
-         
-
                     </tbody>
 
                 </table>

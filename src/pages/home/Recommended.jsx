@@ -12,7 +12,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { useFetchAllBooksQuery } from '../../redux/features/books/booksApi';
 
-
+// On attend l’algo d’Anto
 const Recommended = () => {
   const [page,setPage] = useState(1);
   const {data: books =[]} = useFetchAllBooksQuery({page, pageSize: 10});
@@ -51,7 +51,7 @@ const Recommended = () => {
         >
             
         {
-            books.length > 0 && books.slice(8, 18).map((book, index) => (
+            books.length > 0 && books.map((book, index) => (
                 <SwiperSlide key={index}>
                     <BookCard book={book} isTierList={false} />
                 </SwiperSlide>

@@ -18,38 +18,53 @@ const SingleBook = () => {
     if(isLoading) return <div>Loading...</div>
     if(isError) return <div>Error happending to load book info</div>
   return (
-    <div className="max-w-lg shadow-md p-5">
-            <h1 className="text-2xl font-bold mb-6">{book.title}</h1>
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-indigo-200 flex items-center justify-center p-6">
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 grid md:grid-cols-2 gap-8">
 
-            <div className=''>
-                <div>
-                    <img
-                        src={`${getImgUrl(book.picture_url)}`}
-                        alt={book.title}
-                        className="mb-8"
-                    />
-                </div>
-
-                <div className='mb-5'>
-                    <p className="text-gray-700 mb-2"><strong>Author:</strong> {book?.authors || '?'}</p>
-                    <p className="text-gray-700 mb-4">
-                        <strong>Published:</strong> {book.meta?.status || "N/A"/*.toLocaleDateString()*/}
-                    </p>
-                    <p className="text-gray-700 mb-4 capitalize">
-                        <strong>Category:</strong> {book?.genres}
-                    </p>
-                    <p className="text-gray-700"><strong>Description:</strong> {book?.description}</p>
-                </div>
-
-                {/*
-                <button onClick={() => handleAddToCart(book)} className="btn-primary px-6 space-x-1 flex items-center gap-1 ">
-                    <FiShoppingCart className="" />
-                    <span>Add to Cart</span>
-
-                </button>
-                */}
-            </div>
+        {/* Book Image */}
+        <div className="flex justify-center items-start">
+          <img
+            src={`${getImgUrl(book.picture_url)}`}
+            alt={book.title}
+            className="rounded-xl w-full h-auto max-h-[500px] object-cover shadow-md"
+          />
         </div>
+
+        {/* Book Info */}
+        <div className="flex flex-col justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">{book.title}</h1>
+
+            <p className="text-gray-700 mb-2">
+              <span className="font-semibold">Author:</span> {book?.authors || "?"}
+            </p>
+
+            <p className="text-gray-700 mb-2">
+              <span className="font-semibold">Published:</span> {book.meta?.status || "N/A"}
+            </p>
+
+            <p className="text-gray-700 mb-2 capitalize">
+              <span className="font-semibold">Category:</span> {Array.isArray(book?.genres) ? book.genres.join(', ') : book?.genres}
+            </p>
+
+            <p className="text-gray-700 mt-4">
+              <span className="font-semibold">Description:</span> {book?.description}
+            </p>
+          </div>
+
+          {/* Optional future button */}
+          {/*
+          <button
+            onClick={() => handleAddToCart(book)}
+            className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all flex items-center gap-2"
+          >
+            <FiShoppingCart />
+            <span>Add to Cart</span>
+          </button>
+          */}
+        </div>
+      </div>
+    </div>
   )
 }
 

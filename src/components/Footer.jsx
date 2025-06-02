@@ -1,7 +1,7 @@
 import React from 'react'
 //import footerLogo  from "../assets/footer-logo.png"
 
-import { FaFacebook, FaInstagram } from "react-icons/fa"
+import { FaYoutube, FaInstagram, FaTiktok  } from "react-icons/fa"
 
 const Footer = () => {
   return (
@@ -22,18 +22,8 @@ const Footer = () => {
         {/* Right Side - Newsletter */}
         <div className="md:w-1/2 w-full">
           <p className="mb-4">
-            Subscribe to our newsletter to receive the latest updates, news, and offers!
+            Contact Us on our social media
           </p>
-          <div className="flex">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full px-4 py-2 rounded-l-md text-black bg-white"
-            />
-            <button className="bg-primary px-6 py-2 rounded-r-md hover:bg-primary-dark">
-              Subscribe
-            </button>
-          </div>
         </div>
       </div>
 
@@ -47,11 +37,14 @@ const Footer = () => {
 
         {/* Right Side - Social Icons */}
         <div className="flex gap-6">
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-            <FaFacebook size={24} />
+          <a href="https://www.youtube.com/@ScanReview-tobeornottobe" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+            <FaYoutube size={24} />
           </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+          <a href="https://www.instagram.com/scan.review/" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
             <FaInstagram size={24} />
+          </a>
+          <a href="https://www.tiktok.com/@scan.review0" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+            <FaTiktok  size={24} />
           </a>
         </div>
       </div>
