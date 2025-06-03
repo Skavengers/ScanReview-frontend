@@ -40,7 +40,6 @@ export const AuthProvide = ({children}) =>{
         const unsubscribe = onAuthStateChanged(auth, (user) =>{
             setCurrentUser(user);
             setLoading(false);
-            console.log(user) 
             if(user) {
                 const {email, displayName, photoURL, userStatusIndicator} = user;
                 const userPhotoURL = photoURL

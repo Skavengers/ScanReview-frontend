@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import getBaseUrl from '../../../utils/baseURL';
 
 // Get all lists
 export const fetchLists = createAsyncThunk('lists/fetchLists', async (_, thunkAPI) => {
   try {
-    const res = await axios.get('/api/lists');
+    const res = await axios.get(`${getBaseUrl()}/api/lists`);
     return res.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);
@@ -14,14 +15,14 @@ export const fetchLists = createAsyncThunk('lists/fetchLists', async (_, thunkAP
 // Create a list
 export const createList = createAsyncThunk('lists/createList', async (listData, thunkAPI) => {
   try {
-    console.log("dans le  debut redux list slice")
+    console.log("dans le debut redux list slice");
     const token = localStorage.getItem('token');
-    const res = await axios.post('/api/lists/create-list', listData, {
+    const res = await axios.post(`${getBaseUrl()}/api/lists/create-list`, listData, {
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
-    console.log("A la fin du redux list slice")
+    console.log("A la fin du redux list slice");
     return res.data;
   } catch (error) {
     return thunkAPI.rejectWithValue(error.response.data);
@@ -32,7 +33,7 @@ export const createList = createAsyncThunk('lists/createList', async (listData, 
 export const deleteList = createAsyncThunk('lists/deleteList', async (id, thunkAPI) => {
   try {
     const token = localStorage.getItem('token');
-    await axios.delete(`/api/lists/${id}`, {
+    await axios.delete(`${getBaseUrl()}/api/lists/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -64,7 +65,6 @@ const listSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload || action.error.message;
       })
-
       .addCase(createList.fulfilled, (state, action) => {
         state.lists.push(action.payload);
       })

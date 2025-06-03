@@ -52,8 +52,7 @@ const PopularUpdates = () => {
 
   if (isLoadingFiltered || isLoadingFallback) return <div>Loading...</div>;
   if (isErrorFiltered) return <div>Error loading books.</div>;
-  console.log("combinedBooks:", combinedBooks);
-  console.log("Combined books sample:", combinedBooks[0]);
+  
   return (
     <div className='py-10'>
       <h2 className='text-3xl font-semibold mb-6'>Popular Updates</h2>

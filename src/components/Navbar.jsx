@@ -8,6 +8,7 @@ import { FaHeart } from "react-icons/fa";
 import { FaListOl } from "react-icons/fa6";
 import avatarImg from "../assets/profil_discord.png"
 import { useAuth } from '../context/AuthContext';
+import SearchBar from './SearchBar'
 
 
 const navigation = [
@@ -31,13 +32,14 @@ const navigation = [
         <nav className="flex justify-between items-center">
             {/*Left Side */}
             <div className='flex items-center md:gap-16 gap-4'>
-                <a href="/"><FaBars className='size-6'/></a>
+                <SearchBar />
+                {/*<a href="/"><FaBars className='size-6'/></a>
                 <div className='relative sm:w-72 w-40 space-x-2'>
                     <FaSearch className='absolute inline-block left-3 inset-y-2'/>
                     <input type="text" placeholder='Search here' 
                     className='bg-[#EAEAEA] w-full py-1 md:px-8 px-6 rounded-md focus:outilne-none'
                     />
-                </div>
+                </div>*/}
             </div>
 
 
