@@ -4,13 +4,13 @@ import { Link, useParams } from 'react-router-dom'
 import { FaFire } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa";
 import { useDispatch } from'react-redux'
-import { addToCart } from '../../redux/features/cart/cartSlice'
+//import { addToCart } from '../../redux/features/cart/cartSlice'
 
 const BookCard = ({book, isTierList=true}) => {
   const dispatch = useDispatch();
-  const handleAddToCart = (book) => {
-    dispatch(addToCart(book))
-  }
+  //const handleAddToCart = (book) => {
+  //  dispatch(addToCart(book))
+  //}
   return (
     <div className="flex mt-10 h-full flex-col overflow-hidden bg-white shadow-xl">
     <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
@@ -50,7 +50,7 @@ const BookCard = ({book, isTierList=true}) => {
                           isTierList ? 
                           <div className="ml-3 flex h-7 items-center gap-1 ">
                           <button
-                          onClick={() => handleAddToCart(book)}
+                          //onClick={() => handleAddToCart(book)}
                           type="button"
                           className="relative -top-2 left-1 -m-2 py-1.5 px-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-400  "
                           >

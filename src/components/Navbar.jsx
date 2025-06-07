@@ -13,7 +13,7 @@ import SearchBar from './SearchBar'
 
 const navigation = [
     {name: "Dashboard",href:"/dashboard"},
-    {name: "Orders",href:"/orders"},
+    {name: "Tier List",href:"/lists"},
     {name: "Cart Page",href:"/cart"},
     {name: "Check Out",href:"/checkout"},
 ]

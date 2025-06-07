@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+/*import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useForm } from "react-hook-form"
 import { Link, useNavigate } from 'react-router-dom'
@@ -186,4 +186,5 @@ const CheckOutPage = () => {
     )
 }
 
-export default CheckOutPage
+export default CheckOutPage;
+*/
