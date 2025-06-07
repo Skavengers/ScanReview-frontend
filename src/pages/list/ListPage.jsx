@@ -1,61 +1,10 @@
-import React from 'react';
-import { useDispatch } from 'react-redux';
-import { createList } from '../../redux/features/lists/listSlice';
-
-const SubmitSampleList = () => {
-  const dispatch = useDispatch();
-
-  const handleSubmit = () => {
-    const sampleList = {
-      _id: "my-first-webtoon-list_by_another_personV2",
-      title: "Top 5 Webtoons of 2025",
-      description: "These are the best webtoons I've read this year.",
-      type: "ranked",
-      createdBy: "user123",
-      category: "webtoon",
-      tags: ["action", "romance", "korean"],
-      items: [
-        { rank: 1, id: "sole_veling", explanation: "Great pacing and art." },
-        { rank: 2, id: "tower_of_god", explanation: "Unique story structure." },
-        { rank: 3, id: "god_of_the_bath", explanation: "Love bath my gyat it’s so ..." }
-      ],
-      isPublic: true
-    };
-
-    dispatch(createList(sampleList))
-      .unwrap()
-      .then(res => {
-        console.log("List created successfully:", res);
-      })
-      .catch(err => {
-        console.error("Error creating list:", err);
-      });
-  };
-
-  return (
-    <div className="p-4">
-      <button
-        onClick={handleSubmit}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Submit Sample Webtoon List
-      </button>
-    </div>
-  );
-};
-
-export default SubmitSampleList;
-
-
-/*import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { createList } from '../../redux/features/lists/listSlice';
+import React, { useState } from 'react';
+import { useCreateListMutation } from '../../redux/features/lists/listApiSlice';
 
 const CreateList = () => {
-  const dispatch = useDispatch();
+  const [createList, { isLoading }] = useCreateListMutation();
 
   const [formData, setFormData] = useState({
-    _id: '',
     title: '',
     description: '',
     type: 'ranked',
@@ -97,45 +46,25 @@ const CreateList = () => {
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  console.log('Form data being sent:', formData); // Log the formData object
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log('Form data being sent:', formData);
 
-  try {
-    const result = await dispatch(createList(formData)).unwrap();
-    console.log('Result from dispatch:', result); // Log the result
-    alert('List created successfully!');
-  } catch (err) {
-    console.error('Error caught in catch block:', err);
-    if (err.response) {
-      console.error('Error data:', err.response.data);
-      console.error('Error status:', err.response.status);
-      console.error('Error headers:', err.response.headers);
-      alert(`Failed to create list: ${err.response.data.message || 'Server error'}`);
-    } else if (err.request) {
-      console.error('Error request:', err.request);
-      alert('Failed to create list: No response received from server.');
-    } else {
-      console.error('Error message:', err.message);
-      alert(`Failed to create list: ${err.message}`);
+    try {
+      const result = await createList(formData).unwrap();
+      console.log('Result from createList mutation:', result);
+      alert('List created successfully!');
+      // Optionally reset form here if you want
+    } catch (err) {
+      console.error('Failed to create list:', err);
+      alert(err?.data?.message || 'Failed to create list');
     }
-  }
-};
-
+  };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white shadow rounded mt-10">
       <h2 className="text-xl font-semibold mb-4">Create New List</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-
-        <input
-          type="text"
-          name="_id"
-          placeholder="Optional Custom ID"
-          className="w-full p-2 border rounded"
-          value={formData._id}
-          onChange={handleChange}
-        />
 
         <input
           type="text"
@@ -176,7 +105,6 @@ const handleSubmit = async (e) => {
           <option value="character">Character</option>
         </select>
 
-
         <div>
           <div className="flex gap-2">
             <input
@@ -196,7 +124,6 @@ const handleSubmit = async (e) => {
             ))}
           </div>
         </div>
-
 
         <div className="space-y-2">
           <h3 className="font-medium">Add Items</h3>
@@ -238,7 +165,11 @@ const handleSubmit = async (e) => {
           Public List
         </label>
 
-        <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        >
           Submit
         </button>
       </form>
@@ -247,4 +178,3 @@ const handleSubmit = async (e) => {
 };
 
 export default CreateList;
-*/

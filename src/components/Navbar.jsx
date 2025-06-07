@@ -74,7 +74,7 @@ const navigation = [
                                         <li>
                                             <button
                                             onClick={handleLogOut}
-                                            lassName='block w-full  px-4 py-2 text-sm hover:bg-gray-100'>Logout</button>
+                                            className='block w-full  px-4 py-2 text-sm hover:bg-gray-100'>Logout</button>
                                         </li>
                                     </ul>
                                 </div>

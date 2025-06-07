@@ -16,7 +16,9 @@ import ManageBooks from "../pages/dashboard/manageBooks/ManageBooks";
 import AddBook from "../pages/dashboard/addBook/AddBook";
 import UpdateBook from "../pages/dashboard/editBook/UpdateBook";
 import ListSelector from "../pages/list/ListSelector";
-import CreateList from "../pages/list/listPage";
+import CreateList from "../pages/list/ListPage";
+import ListViewer from "../pages/list/ListViewer";
+import SingleListViewer from "../pages/list/SingleListViewer";
 const router = createBrowserRouter([
     {
         path: "/",
@@ -64,11 +66,15 @@ const router = createBrowserRouter([
             },
             {
                 path: "/lists",
-                element: <ListSelector />
+                element: <ListViewer />
             },
             {
                 path: "/create-list",
                 element: <CreateList />
+            },
+            {
+                path: "/lists/:id",
+                element: <SingleListViewer />
             }
         ]
     },

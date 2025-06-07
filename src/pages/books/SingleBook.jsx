@@ -8,15 +8,15 @@ import { addToCart } from '../../redux/features/cart/cartSlice';
 import { useFetchBookByIdQuery } from '../../redux/features/books/booksApi';
 // CSS MOCHE à prendre celui du bas plus beau
 const SingleBook = () => {
-    const {id} = useParams();
-    const {data: book, isLoading, isError} = useFetchBookByIdQuery(id);
-    const dispatch =  useDispatch();
-    const handleAddToCart = (product) => {
-        dispatch(addToCart(product))
-    }
+  const {id} = useParams();
+  const {data: book, isLoading, isError} = useFetchBookByIdQuery(id);
+  const dispatch =  useDispatch();
+  const handleAddToCart = (product) => {
+      dispatch(addToCart(product))
+  }
 
-    if(isLoading) return <div>Loading...</div>
-    if(isError) return <div>Error happending to load book info</div>
+  if(isLoading) return <div>Loading...</div>
+  if(isError) return <div>Error happending to load book info</div>
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 to-indigo-200 flex items-center justify-center p-6">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 grid md:grid-cols-2 gap-8">
