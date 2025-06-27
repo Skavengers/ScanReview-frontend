@@ -1,140 +1,207 @@
-import React, { useEffect } from 'react'
-import InputField from '../addBook/InputField'
-import SelectField from '../addBook/SelectField'
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useFetchBookByIdQuery, useUpdateBookMutation } from '../../../redux/features/books/booksApi';
-import Loading from '../../../components/Loading';
-import Swal from 'sweetalert2';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import getBaseUrl from '../../../utils/baseURL';
+import Loading from '../../../components/Loading';
 
 const UpdateBook = () => {
   const { id } = useParams();
-  const { data: bookData, isLoading, isError, refetch } = useFetchBookByIdQuery(id);
-  // console.log(bookData)
-  const [updateBook] = useUpdateBookMutation();
-  const { register, handleSubmit, setValue, reset } = useForm();
-  useEffect(() => {
-    if (bookData) {
-      setValue('title', bookData.title);
-      setValue('description', bookData.description);
-      setValue('category', bookData?.category);
-      setValue('trending', bookData.trending);
-      setValue('oldPrice', bookData.oldPrice);
-      setValue('newPrice', bookData.newPrice);
-      setValue('coverImage', bookData.coverImage)
-    }
-  }, [bookData, setValue])
+  const [imageFile, setImageFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (data) => {
-    const updateBookData = {
-      title: data.title,
-      description: data.description,
-      category: data.category,
-      trending: data.trending,
-      oldPrice: Number(data.oldPrice),
-      newPrice: Number(data.newPrice),
-      coverImage: data.coverImage || bookData.coverImage,
+  const { register, handleSubmit, control, reset, setValue } = useForm({
+    defaultValues: {
+      alternate_titles: [],
+      authors: [],
+      genres: [],
+      main_characters: [],
+      meta: { publication_period: '', status: '' }
+    }
+  });
+
+  const {
+    fields: altTitles,
+    append: addAltTitle,
+    remove: removeAltTitle
+  } = useFieldArray({ control, name: 'alternate_titles' });
+
+  const {
+    fields: authors,
+    append: addAuthor,
+    remove: removeAuthor
+  } = useFieldArray({ control, name: 'authors' });
+
+  const {
+    fields: genres,
+    append: addGenre,
+    remove: removeGenre
+  } = useFieldArray({ control, name: 'genres' });
+
+  const {
+    fields: characters,
+    append: addCharacter,
+    remove: removeCharacter
+  } = useFieldArray({ control, name: 'main_characters' });
+
+  // Fetch book data
+  useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        const res = await axios.get(`${getBaseUrl()}/api/books/${id}`);
+        const data = res.data;
+        reset(data);
+      } catch (error) {
+        console.error("Error fetching book:", error);
+      }
     };
+    fetchBook();
+  }, [id, reset]);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
+  };
+
+  const onSubmit = async (formData) => {
     try {
-      await axios.put(`${getBaseUrl()}/api/books/edit/${id}`, updateBookData, {
+      setLoading(true);
+
+      let finalImageUrl = formData.picture_url; // default to manual entry
+
+      // If file is selected, override it by uploading
+      if (imageFile) {
+        const imageFormData = new FormData();
+        imageFormData.append('image', imageFile);
+        const uploadRes = await axios.post(
+          `${getBaseUrl()}/api/images/upload`,
+          imageFormData,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          }
+        );
+
+        finalImageUrl = uploadRes.data.imageUrl;
+      }
+
+      const updatedBook = {
+        ...formData,
+        picture_url: finalImageUrl,
+      };
+
+      await axios.put(`${getBaseUrl()}/api/books/edit/${id}`, updatedBook, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      })
-      Swal.fire({
-        title: "Book Updated",
-        text: "Your book is updated successfully!",
-        icon: "success",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, It's Okay!"
+        },
       });
-      await refetch()
-    } catch (error) {
-      console.log("Failed to update book.");
-      alert("Failed to update book.");
+
+      Swal.fire('Updated!', 'Book updated successfully.', 'success');
+    } catch (err) {
+      console.error(err);
+      Swal.fire('Error', 'Failed to update book.', 'error');
+    } finally {
+      setLoading(false);
     }
-  }
-  if (isLoading) return <Loading />
-  if (isError) return <div>Error fetching book data</div>
+  };
+
+
+  if (loading) return <Loading />;
+
   return (
-    <div className="max-w-lg mx-auto md:p-6 p-3 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Update Book</h2>
+    <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow">
+      <h2 className="text-2xl font-bold mb-4">Update Book</h2>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <InputField
-          label="Title"
-          name="title"
-          placeholder="Enter book title"
-          register={register}
-        />
 
-        <InputField
-          label="Description"
-          name="description"
-          placeholder="Enter book description"
-          type="textarea"
-          register={register}
-        />
+        <label className="block font-medium">Title</label>
+        <input {...register('title')} className="input" />
 
-        <SelectField
-          label="Category"
-          name="category"
-          options={[
-            { value: '', label: 'Choose A Category' },
-            { value: 'business', label: 'Business' },
-            { value: 'technology', label: 'Technology' },
-            { value: 'fiction', label: 'Fiction' },
-            { value: 'horror', label: 'Horror' },
-            { value: 'adventure', label: 'Adventure' },
-          ]}
-          register={register}
-        />
+        <label className="block font-medium mt-4">Origin Country</label>
+        <input {...register('origin_country')} className="input" />
+
+        <label className="block font-medium mt-4 ">Description</label>
+        <textarea {...register('description')} className="input mr-6 bg-gray-100" />
+
+        {/* Alternate Titles */}
+        <label className="block font-medium mt-4">Alternate Titles</label>
+        {altTitles.map((_, index) => (
+          <div key={index} className="flex gap-2 mb-2">
+            <input {...register(`alternate_titles.${index}`)} className="input" />
+            <button type="button" onClick={() => removeAltTitle(index)}>❌</button>
+          </div>
+        ))}
+        <button type="button" onClick={() => addAltTitle('')} className="btn">+ Add</button>
+
+        {/* Authors */}
+        <label className="block font-medium mt-4">Authors</label>
+        {authors.map((_, index) => (
+          <div key={index} className="flex gap-2 mb-2">
+            <input {...register(`authors.${index}`)} className="input" />
+            <button type="button" onClick={() => removeAuthor(index)}>❌</button>
+          </div>
+        ))}
+        <button type="button" onClick={() => addAuthor('')} className="btn">+ Add</button>
+
+        {/* Genres */}
+        <label className="block font-medium mt-4">Genres</label>
+        {genres.map((_, index) => (
+          <div key={index} className="flex gap-2 mb-2">
+            <input {...register(`genres.${index}`)} className="input" />
+            <button type="button" onClick={() => removeGenre(index)}>❌</button>
+          </div>
+        ))}
+        <button type="button" onClick={() => addGenre('')} className="btn">+ Add</button>
+
+        {/* Characters */}
+        <label className="block font-medium mt-4">Main Characters</label>
+        {characters.map((_, index) => (
+          <div key={index} className="grid grid-cols-3 gap-2 mb-2">
+            <input placeholder="Name" {...register(`main_characters.${index}.name`)} className="input" />
+            <input placeholder="Picture URL" {...register(`main_characters.${index}.picture_url`)} className="input" />
+            <input placeholder="Role" {...register(`main_characters.${index}.role`)} className="input" />
+            <button type="button" onClick={() => removeCharacter(index)} className="col-span-3 text-sm text-red-500 mt-1">Remove</button>
+          </div>
+        ))}
+        <button type="button" onClick={() => addCharacter({ name: '', picture_url: '', role: '' })} className="btn mt-2">+ Add Character</button>
+
+        {/* Meta */}
+        <label className="block font-medium mt-4">Publication Period</label>
+        <input {...register('meta.publication_period')} className="input" />
+
+        <label className="block font-medium mt-4">Status</label>
+        <input {...register('meta.status')} className="input" />
+
+        {/* Cover Image URL */}
         <div className="mb-4">
-          <label className="inline-flex items-center">
-            <input
-              type="checkbox"
-              {...register('trending')}
-              className="rounded text-blue-600 focus:ring focus:ring-offset-2 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-sm font-semibold text-gray-700">Trending</span>
-          </label>
+          <label className="block font-medium">Cloudinary Image URL</label>
+          <input
+            type="text"
+            {...register('picture_url')}
+            placeholder="Paste Cloudinary image URL"
+            className="input"
+          />
+        </div>
+              
+        {/* File Upload */}
+        <div className="mb-4">
+          <label className="block font-medium">Upload New Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="input"
+          />
         </div>
 
-        <InputField
-          label="Old Price"
-          name="oldPrice"
-          type="number"
-          placeholder="Old Price"
-          register={register}
-        />
-
-        <InputField
-          label="New Price"
-          name="newPrice"
-          type="number"
-          placeholder="New Price"
-          register={register}
-        />
-
-        <InputField
-          label="Cover Image URL"
-          name="coverImage"
-          type="text"
-          placeholder="Cover Image URL"
-          register={register}
-        />
-
-        <button type="submit" className="w-full py-2 bg-blue-500 text-white font-bold rounded-md">
-          Update Book
+        <button type="submit" className="w-full py-2 bg-blue-600 text-white mt-4 rounded">
+          {loading ? 'Updating...' : 'Update Book'}
         </button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default UpdateBook
+export default UpdateBook;

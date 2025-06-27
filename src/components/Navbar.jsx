@@ -9,7 +9,8 @@ import { FaListOl } from "react-icons/fa6";
 import avatarImg from "../assets/profil_discord.png"
 import { useAuth } from '../context/AuthContext';
 import SearchBar from './SearchBar'
-
+import SingleImageDisplay from './SingleImageDisplay';
+import { useFetchBookByPictureUrlQuery } from '../redux/features/books/booksApi';
 
 const navigation = [
     {name: "Dashboard",href:"/dashboard"},
@@ -31,17 +32,18 @@ const navigation = [
     <header className="max-w-screen-2xl mx-auto px-4 py-6">
         <nav className="flex justify-between items-center">
             {/*Left Side */}
-            <div className='flex items-center md:gap-16 gap-4'>
-                <SearchBar />
-                {/*<a href="/"><FaBars className='size-6'/></a>
-                <div className='relative sm:w-72 w-40 space-x-2'>
-                    <FaSearch className='absolute inline-block left-3 inset-y-2'/>
-                    <input type="text" placeholder='Search here' 
-                    className='bg-[#EAEAEA] w-full py-1 md:px-8 px-6 rounded-md focus:outilne-none'
-                    />
-                </div>*/}
+            
+            <div className="flex items-center gap-4">
+              <Link to="/" className="shrink-0">
+                <img
+                  src="https://res.cloudinary.com/dzi37tegh/image/upload/v1751017714/logoV2_ueltpn.png"
+                  className="h-12 w-auto object-cover object-center"
+                  alt="logo"
+                />
+              </Link>
+              <SearchBar />
             </div>
-
+            
 
             {/*Right side*/ }
             <div className='relative flex items-center md:space-x-3 space-x-2'>

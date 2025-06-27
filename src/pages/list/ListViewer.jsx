@@ -1,5 +1,6 @@
 import React from 'react';
 import { useFetchListsQuery } from '../../redux/features/lists/listApiSlice';
+import { Link } from 'react-router-dom';
 
 const ListViewer = () => {
   const {
@@ -44,19 +45,21 @@ const ListViewer = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {lists.map(list => (
-          <div key={list._id} className="shadow-md p-4 border rounded bg-white">
-            <h2 className="text-xl font-semibold mb-1">{list.title}</h2>
-            <p className="text-sm text-gray-600 mb-2">{list.description}</p>
-            <div className="text-xs text-gray-500 mb-2">
-              <span className="mr-2 capitalize">Type: {list.type}</span>
-              <span className="mr-2 capitalize">Category: {list.category}</span>
+          <Link to={`/lists/${list._id}`}>
+            <div key={list._id} className="shadow-md p-4 border rounded bg-white">
+              <h2 className="text-xl font-semibold mb-1">{list.title}</h2>
+              <p className="text-sm text-gray-600 mb-2">{list.description}</p>
+              <div className="text-xs text-gray-500 mb-2">
+                <span className="mr-2 capitalize">Type: {list.type}</span>
+                <span className="mr-2 capitalize">Category: {list.category}</span>
+              </div>
+              <div className="flex text-xs text-gray-400 gap-4">
+                <span>{list.items.length} items</span>
+                <span>{list.views} views</span>
+                <span>{list.likes} likes</span>
+              </div>
             </div>
-            <div className="flex text-xs text-gray-400 gap-4">
-              <span>{list.items.length} items</span>
-              <span>{list.views} views</span>
-              <span>{list.likes} likes</span>
-            </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

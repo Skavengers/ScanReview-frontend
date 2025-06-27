@@ -13,7 +13,8 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import ManageBooks from "../pages/dashboard/manageBooks/ManageBooks";
 import AddBook from "../pages/dashboard/addBook/AddBook";
 import UpdateBook from "../pages/dashboard/editBook/UpdateBook";
-import CreateList from "../pages/list/ListPage";
+//import CreateList from "../pages/list/ListPage";
+import CreateList from "../pages/list/CreateList";
 import ListViewer from "../pages/list/ListViewer";
 import SingleListViewer from "../pages/list/SingleListViewer";
 const router = createBrowserRouter([
@@ -42,10 +43,6 @@ const router = createBrowserRouter([
                 path: "/cart",
                 element: <CartPage />
             },
-            {
-                path: "/tierList",
-                element: "Tier List"
-            },
 
             {
                 path: "/books/:id",
@@ -61,7 +58,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "/create-list",
-                element: <CreateList />
+                element: <PrivateRoute><CreateList /></PrivateRoute>
             },
             {
                 path: "/lists/:id",

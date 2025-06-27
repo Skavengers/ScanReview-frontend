@@ -1,10 +1,11 @@
 import React from 'react'
-import { getImgUrl } from '../../utils/getImgUrl'
-import { Link, useParams } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom'
 import { FaFire } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa";
-import { useDispatch } from'react-redux'
+//import { useDispatch } from'react-redux'
 //import { addToCart } from '../../redux/features/cart/cartSlice'
+import SingleImageDisplay from '../../components/SingleImageDisplay';
 
 const BookCard = ({book, isTierList=true}) => {
   const dispatch = useDispatch();
@@ -33,11 +34,15 @@ const BookCard = ({book, isTierList=true}) => {
                   </div>
 
                   <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
-                    <img
+                    {/*<img
                       alt=""
-                      src={`${getImgUrl(book.title)}`}
+                      src={`${getImgUrl(book.picture_url)}`}
                       className="h-full w-full object-cover object-center"
-                    />
+                    />*/}
+                    
+                    <SingleImageDisplay pictureUrl={book.picture_url} className="h-full w-full object-cover object-center" />
+                    
+                    
                   </div>
 
                   <div className="ml-4 flex flex-1 flex-col">

@@ -9,7 +9,7 @@ const CreateList = () => {
     description: '',
     type: 'ranked',
     category: 'webtoon',
-    createdBy: '',
+    //createdBy: 'ee',
     tags: [],
     items: [],
     isPublic: true,
@@ -49,7 +49,7 @@ const CreateList = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Form data being sent:', formData);
-
+    //console.log("User ID from token:", req.user?.id);
     try {
       const result = await createList(formData).unwrap();
       console.log('Result from createList mutation:', result);
@@ -82,16 +82,6 @@ const CreateList = () => {
           className="w-full p-2 border rounded"
           value={formData.description}
           onChange={handleChange}
-        />
-
-        <input
-          type="text"
-          name="createdBy"
-          placeholder="Created By (User ID)"
-          className="w-full p-2 border rounded"
-          value={formData.createdBy}
-          onChange={handleChange}
-          required
         />
 
         <select name="type" value={formData.type} onChange={handleChange} className="w-full p-2 border rounded">

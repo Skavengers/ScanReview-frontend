@@ -1,7 +1,7 @@
 import React from 'react'
 import { FiShoppingCart } from "react-icons/fi"
 import { useParams } from "react-router-dom"
-
+import SingleImageDisplay from '../../components/SingleImageDisplay';
 import { getImgUrl } from '../../utils/getImgUrl';
 import { useDispatch } from 'react-redux';
 //import { addToCart } from '../../redux/features/cart/cartSlice';
@@ -14,7 +14,7 @@ const SingleBook = () => {
   //const handleAddToCart = (product) => {
   //    dispatch(addToCart(product))
   //}
-
+  //console.log(book.picture_url)
   if(isLoading) return <div>Loading...</div>
   if(isError) return <div>Error happending to load book info</div>
   return (
@@ -22,14 +22,16 @@ const SingleBook = () => {
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 grid md:grid-cols-2 gap-8">
 
         {/* Book Image */}
-        <div className="flex justify-center items-start">
+        {/*
           <img
             src={`${getImgUrl(book.picture_url)}`}
             alt={book.title}
-            className="rounded-xl w-full h-auto max-h-[500px] object-cover shadow-md"
+            
           />
+        */}
+        <div className="flex justify-center items-start">
+          <SingleImageDisplay className="rounded-xl w-full h-auto max-h-[500px] object-cover shadow-md" pictureUrl={book.picture_url} />
         </div>
-
         {/* Book Info */}
         <div className="flex flex-col justify-between">
           <div>
