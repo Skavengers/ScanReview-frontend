@@ -86,7 +86,7 @@ const navigation = [
                     }
                 </div>
                 <div className='bg-red-500 m-1 text-white p-2 rounded-2xl flex'>
-                    <Link to="/cart" className='flex items-center'>
+                    <Link to="/lists" className='flex items-center'>
                         <FaListOl className='mr-2' /> TierList
                     </Link>
                 </div>

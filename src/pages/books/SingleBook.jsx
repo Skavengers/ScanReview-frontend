@@ -1,215 +1,235 @@
-import React from 'react'
-import { FiShoppingCart } from "react-icons/fi"
-import { useParams } from "react-router-dom"
+import React, { useState, useEffect } from 'react';
+import { useParams } from "react-router-dom";
+import { useAuth } from '../../context/AuthContext';
 import SingleImageDisplay from '../../components/SingleImageDisplay';
-import { getImgUrl } from '../../utils/getImgUrl';
-import { useDispatch } from 'react-redux';
-//import { addToCart } from '../../redux/features/cart/cartSlice';
 import { useFetchBookByIdQuery } from '../../redux/features/books/booksApi';
-// CSS MOCHE à prendre celui du bas plus beau
+import { useFetchUserInteractionsQuery, useSaveUserInteractionMutation } from '../../redux/features/userInteractions/userInteractionsApi';
+import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
+import { useDispatch } from 'react-redux';
+
 const SingleBook = () => {
-  const {id} = useParams();
-  const {data: book, isLoading, isError} = useFetchBookByIdQuery(id);
-  const dispatch =  useDispatch();
-  //const handleAddToCart = (product) => {
-  //    dispatch(addToCart(product))
-  //}
-  //console.log(book.picture_url)
-  if(isLoading) return <div>Loading...</div>
-  if(isError) return <div>Error happending to load book info</div>
+  const { id } = useParams();
+  const { currentUser } = useAuth();
+  const { data: book, isLoading, isError } = useFetchBookByIdQuery(id);
+  const { data: userInteraction } = useFetchUserInteractionsQuery({ userId: currentUser?.uid, bookId: id });
+  const [saveUserInteraction] = useSaveUserInteractionMutation();
+
+  const [userRating, setUserRating] = useState(0);
+  const [userStatus, setUserStatus] = useState('');
+  const [userNote, setUserNote] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (userInteraction) {
+      setUserRating(userInteraction.rating || 0);
+      setUserStatus(userInteraction.status || '');
+      setUserNote(userInteraction.note || '');
+    }
+  }, [userInteraction]);
+
+  const saveInteraction = async (interactionData) => {
+    try {
+      await saveUserInteraction(interactionData).unwrap();
+    } catch (error) {
+      console.error('Error saving interaction:', error);
+      setError('Failed to save interaction. Please try again.');
+    }
+  };
+
+  const handleStarClick = async (ratingValue) => {
+    if (!currentUser) {
+      alert('You need to be logged in to rate this book.');
+      return;
+    }
+
+    setUserRating(ratingValue);
+    await saveInteraction({
+      userId: currentUser.uid,
+      bookId: id,
+      rating: ratingValue,
+      status: userStatus,
+      note: userNote,
+    });
+  };
+
+  const handleStatusToggle = async (status) => {
+    if (!currentUser) {
+      alert('You need to be logged in to change your reading status.');
+      return;
+    }
+
+    setUserStatus(status);
+
+    await saveInteraction({
+      userId: currentUser.uid,
+      bookId: id,
+      rating: userRating,
+      status: status,
+      note: userNote,
+    });
+  };
+
+  const handleNoteChange = (event) => {
+    if (!currentUser) {
+      alert('You need to be logged in to add or modify notes.');
+      return;
+    }
+
+    setUserNote(event.target.value);
+  };
+
+  const saveNote = async () => {
+    if (!currentUser) {
+      alert('You need to be logged in to save notes.');
+      return;
+    }
+
+    await saveInteraction({
+      userId: currentUser.uid,
+      bookId: id,
+      rating: userRating,
+      status: userStatus,
+      note: userNote,
+    });
+  };
+
+  const renderStars = (rating) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating - fullStars >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<FaStar key={`full-${i}`} className="text-yellow-500" />);
+    }
+
+    if (hasHalfStar) {
+      stars.push(<FaStarHalfAlt key="half" className="text-yellow-500" />);
+    }
+
+    while (stars.length < 5) {
+      stars.push(<FaRegStar key={`empty-${stars.length}`} className="text-yellow-500" />);
+    }
+
+    return stars;
+  };
+
+  const convertStarRatingToGrade = (starRating) => {
+    return starRating * 2;
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error happened while loading book info</div>;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 to-indigo-200 flex items-center justify-center p-6">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 grid md:grid-cols-2 gap-8">
-
-        {/* Book Image */}
-        {/*
-          <img
-            src={`${getImgUrl(book.picture_url)}`}
-            alt={book.title}
-            
-          />
-        */}
-        <div className="flex justify-center items-start">
-          <SingleImageDisplay className="rounded-xl w-full h-auto max-h-[500px] object-cover shadow-md" pictureUrl={book.picture_url} />
-        </div>
-        {/* Book Info */}
-        <div className="flex flex-col justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{book.title}</h1>
-
-            <p className="text-gray-700 mb-2">
-              <span className="font-semibold">Author:</span> {book?.authors || "?"}
-            </p>
-
-            <p className="text-gray-700 mb-2">
-              <span className="font-semibold">Published:</span> {book.meta?.status || "N/A"}
-            </p>
-
-            <p className="text-gray-700 mb-2 capitalize">
-              <span className="font-semibold">Category:</span> {Array.isArray(book?.genres) ? book.genres.join(', ') : book?.genres}
-            </p>
-
-            <p className="text-gray-700 mt-4">
-              <span className="font-semibold">Description:</span> {book?.description}
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="md:flex">
+          <div className="md:flex-shrink-0 p-6 flex justify-center items-center">
+            <SingleImageDisplay
+              className="rounded-lg w-full max-w-md h-auto shadow-md"
+              pictureUrl={book.picture_url}
+            />
           </div>
-
-          {/* Optional future button */}
-          {/*
-          <button
-            onClick={() => handleAddToCart(book)}
-            className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all flex items-center gap-2"
-          >
-            <FiShoppingCart />
-            <span>Add to Cart</span>
-          </button>
-          */}
+          <div className="p-8">
+            <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold">Book</div>
+            <h1 className="block mt-1 text-3xl leading-tight font-bold text-gray-900">{book.title}</h1>
+            <div className="mt-2 text-gray-600">
+              <p className="mt-2">
+                <span className="font-semibold text-gray-900">Author:</span> {book?.authors?.join(', ') || "Unknown"}
+              </p>
+              <p className="mt-2">
+                <span className="font-semibold text-gray-900">Published:</span> {book.meta?.publication_period || "N/A"}
+              </p>
+              <p className="mt-2">
+                <span className="font-semibold text-gray-900">Status:</span> {book.meta?.status || "N/A"}
+              </p>
+              <p className="mt-2">
+                <span className="font-semibold text-gray-900">Genres:</span> {(book.genres ?? []).join(', ')}
+              </p>
+            </div>
+            <p className="mt-4 text-gray-700 leading-relaxed">
+              <span className="font-semibold text-gray-900">Description:</span> {book?.description}
+            </p>
+            <div className="mt-6 flex items-center">
+              <span className="font-semibold text-gray-900 mr-4">Rating: {book.stats?.average_rating || 0} ({convertStarRatingToGrade(book.stats?.average_rating || 0)})</span>
+              <div className="flex">
+                {renderStars(book.stats?.average_rating || 0)}
+              </div>
+            </div>
+            <div className="mt-4">
+              <span className="font-semibold text-gray-900">Rate this book:</span>
+              <div className="flex mt-2">
+                {[...Array(5)].map((_, index) => {
+                  const starValue = index + 1;
+                  return (
+                    <FaStar
+                      key={starValue}
+                      className={`cursor-pointer ${userRating >= starValue ? 'text-yellow-500' : 'text-gray-300'}`}
+                      onClick={() => handleStarClick(starValue)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+            <div className="mt-4">
+              <span className="font-semibold text-gray-900">Your Notes:</span>
+              <textarea
+                className="mt-2 w-full p-2 border rounded"
+                value={userNote}
+                onChange={handleNoteChange}
+                placeholder="Write your notes here..."
+                disabled={!currentUser}
+              />
+              {currentUser && (
+                <button
+                  onClick={saveNote}
+                  className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                >
+                  Save Note
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="px-8 py-6 bg-gray-50">
+          <h3 className="text-lg font-semibold text-gray-900">Your Reading Status</h3>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-5">
+            {['reading', 'completed', 'on_hold', 'dropped', 'plan_to_read'].map((status) => (
+              <button
+                key={status}
+                onClick={() => handleStatusToggle(status)}
+                className={`px-4 py-2 rounded-lg ${userStatus === status ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                disabled={!currentUser}
+              >
+                {status.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="px-8 py-6 bg-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900">Additional Information</h3>
+          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-sm font-medium text-gray-500">Total Views</p>
+              <p className="mt-1 text-lg font-semibold text-gray-900">{book.stats?.total_views || 0}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Favorite Count</p>
+              <p className="mt-1 text-lg font-semibold text-gray-900">{book.stats?.favorite_count || 0}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Comments Count</p>
+              <p className="mt-1 text-lg font-semibold text-gray-900">{book.stats?.comments_count || 0}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-500">Reviews Count</p>
+              <p className="mt-1 text-lg font-semibold text-gray-900">{book.stats?.review_count || 0}</p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
-
-export default SingleBook;
-
-/*
-//example of better css 
-import React from 'react';
-import { FaHeart, FaFire, FaUser } from 'react-icons/fa';
-import { MdOutlineUpdate } from 'react-icons/md';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-import { Navigation, Pagination } from 'swiper/modules';
-import Picture from "../../assets/books/Solo Leveling.png"
-
-const SingleBook = ({ webtoon=webtoonData, characters=charactersData }) => {
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
-      <div className="max-w-4xl mx-auto bg-white text-black rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row mb-8">
-        <img className="w-full md:w-1/3 h-auto object-cover" src={Picture} alt={webtoon.main_title} />
-        <div className="p-6 md:p-8 w-full md:w-2/3 flex flex-col justify-between">
-          <div>
-            <h2 className="text-3xl font-bold mb-4">{webtoon.main_title}</h2>
-            <div className="flex flex-wrap mb-6">
-              {webtoon.authors.map((author, index) => (
-                <span key={index} className="bg-gray-200 text-gray-700 text-sm font-medium mr-2 mb-2 px-3 py-1 rounded-full">
-                  {author}
-                </span>
-              ))}
-            </div>
-            <div className="flex flex-wrap mb-6">
-              {webtoon.genre.map((genre, index) => (
-                <span key={index} className="bg-gray-200 text-gray-700 text-sm font-medium mr-2 mb-2 px-3 py-1 rounded-full">
-                  {genre}
-                </span>
-              ))}
-            </div>
-          </div>
-          <div className="flex flex-wrap justify-between items-center mb-6">
-            <div className="flex items-center text-gray-600 hover:text-red-500 transition-colors duration-300">
-              <FaHeart className="mr-2" /> {webtoon.favorites}
-            </div>
-            <div className="flex items-center text-gray-600 hover:text-orange-500 transition-colors duration-300">
-              <FaFire className="mr-2" /> {webtoon.popularity}
-            </div>
-            <div className="flex items-center text-gray-600 hover:text-blue-500 transition-colors duration-300">
-              <FaUser className="mr-2" /> {webtoon.characters.main_character}
-            </div>
-            <div className={`flex items-center text-gray-600 hover:text-green-500 transition-colors duration-300 ${webtoon.Ongoing ? 'text-green-600' : 'text-red-600'}`}>
-              <MdOutlineUpdate className="mr-2" /> {webtoon.Ongoing ? 'Ongoing' : 'Completed'}
-            </div>
-          </div>
-          <p className="text-gray-600">{webtoon.description}</p>
-        </div>
-      </div>
-      <Swiper
-        slidesPerView={1}
-        spaceBetween={30}
-        navigation={true}
-        breakpoints={{
-          640: {
-            slidesPerView: 1,
-            spaceBetween: 20,
-          },
-          768: {
-            slidesPerView: 2,
-            spaceBetween: 40,
-          },
-          1024: {
-            slidesPerView: 2,
-            spaceBetween: 50,
-          },
-          1180: {
-            slidesPerView: 3,
-            spaceBetween: 50,
-          }
-        }}
-        modules={[Pagination, Navigation]}
-        className="mySwiper w-full max-w-6xl"
-      >
-        {characters.map((character, index) => (
-          <SwiperSlide key={index}>
-            <div className="bg-white text-black rounded-lg shadow-md p-4">
-              <img className="w-full h-48 object-cover mb-4 rounded-t-lg" src={character.picture} alt={character.name} />
-              <h3 className="text-xl font-bold mb-2">{character.name}</h3>
-              <p className="text-gray-600">{character.description}</p>
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
     </div>
   );
 };
 
-const webtoonData = {
-  "_id": 1,
-  "picture": "https://s04.mpizz.org/thumb/W600/mpim/1df/1dfe77bd0eee292cafcfd960d6aefb570b024f53_1530_2429_1365668.webp",
-  "main_title": "One Piece",
-  "secondary_titles": [],
-  "authors": [
-      "Shounen Jump",
-      "Eiichiro Oda",
-      "尾田 栄一郎"
-  ],
-  "genre": [
-      "Manga",
-      "Shounen(B)",
-      "Action",
-      "Adventure",
-      "Comedy",
-      "Fantasy",
-      "Super Power",
-      "Super Power"
-  ],
-  "country_origin": "Japanese",
-  "Ongoing": true,
-  "hot": false,
-  "rated": 0,
-  "description": "Gol D. Roger, a man referred to as the \"Pirate King,\" is set to be executed by the World Government. But just before his demise, he confirms the existence of a great treasure, One Piece, located somewhere within the vast ocean known as the Grand Line. Announcing that One Piece can be claimed by anyone worthy enough to reach it, the Pirate King is executed and the Great Age of Pirates begins.Twenty-two years later, a young man by the name of Monkey D. Luffy is ready to embark on his own adventure, searching for One Piece and striving to become the new Pirate King. Armed with just a straw hat, a small boat, and an elastic body, he sets out on a fantastic journey to gather his own crew and a worthy ship that will take them across the Grand Line to claim the greatest status on the high seas.",
-  "popularity": 1000000,
-  "favorites": 100,
-  "characters": {
-      "main_character": "Luffy"
-  },
-  "plannig": 1,
-  "updatedAt": "2025-04-25T21:23:22.765Z",
-  "createdAt": "2025-04-28T16:31:10.322Z"
-};
-
-const charactersData = [
-  {
-    name: 'Luffy',
-    picture: 'https://example.com/luffy.jpg',
-    description: 'Monkey D. Luffy, also known as "Straw Hat Luffy" and commonly as "Straw Hat", is the main protagonist of the manga and anime, One Piece.'
-  },
-  {
-    name: 'Zoro',
-    picture: 'https://example.com/zoro.jpg',
-    description: 'Roronoa Zoro, also known as "Pirate Hunter" Zoro, is a fictional character in the One Piece franchise created by Eiichiro Oda.'
-  },
-];
-
 export default SingleBook;
-*/

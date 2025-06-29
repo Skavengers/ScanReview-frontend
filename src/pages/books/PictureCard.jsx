@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { getImgUrl } from '../../utils/getImgUrl'
 // <img
 //   alt=""
 //   src={`${getImgUrl()}`}
