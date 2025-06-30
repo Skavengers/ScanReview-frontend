@@ -13,10 +13,10 @@ import Dashboard from "../pages/dashboard/Dashboard";
 import ManageBooks from "../pages/dashboard/manageBooks/ManageBooks";
 import AddBook from "../pages/dashboard/addBook/AddBook";
 import UpdateBook from "../pages/dashboard/editBook/UpdateBook";
-//import CreateList from "../pages/list/ListPage";
-import CreateList from "../pages/list/CreateList";
+//import CreateList from "../pages/list/CreateList";
 import ListViewer from "../pages/list/ListViewer";
 import SingleListViewer from "../pages/list/SingleListViewer";
+import ModifyList from "../pages/list/ModifyList";
 const router = createBrowserRouter([
     {
         path: "/",
@@ -57,8 +57,8 @@ const router = createBrowserRouter([
                 element: <ListViewer />
             },
             {
-                path: "/create-list",
-                element: <PrivateRoute><CreateList /></PrivateRoute>
+                path: "/lists/modify-list",
+                element: <PrivateRoute><ModifyList /></PrivateRoute>
             },
             {
                 path: "/lists/:id",

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import BookCard from '../books/BookCard';
+import PictureCard from '../books/PictureCard';
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -15,34 +16,34 @@ import { useFetchAllBooksQuery } from '../../redux/features/books/booksApi';
 // On attend l’algo d’Anto
 const Recommended = () => {
   const [page,setPage] = useState(1);
-  const {data: books =[]} = useFetchAllBooksQuery({page, pageSize: 10});
+  const {data: books =[]} = useFetchAllBooksQuery({page, pageSize: 25});
   
   return (
-    <div className='py-10'>
+    <div className='py-5 '>
         <h2 className='text-3xl font-semibold mb-6'>
             Recommended for you
         </h2>
 
         <Swiper
-            slidesPerView={1}
-            spaceBetween={30}
+            slidesPerView={2}
+            spaceBetween={5}
             navigation={true}
             
             breakpoints={{
               640: {
-                slidesPerView: 1,
+                slidesPerView: 2,
                 spaceBetween: 20,
               },
               768: {
-                slidesPerView: 2,
+                slidesPerView: 4,
                 spaceBetween: 40,
               },
               1024: {
-                slidesPerView: 2,
+                slidesPerView: 4,
                 spaceBetween: 50,
               },
               1180: {
-                slidesPerView: 3,
+                slidesPerView: 8,
                 spaceBetween: 50,
               }
             }}
@@ -53,7 +54,7 @@ const Recommended = () => {
         {
             books.length > 0 && books.map((book, index) => (
                 <SwiperSlide key={index}>
-                    <BookCard book={book} isTierList={false} />
+                    <PictureCard book={book} />
                 </SwiperSlide>
             ))
         }

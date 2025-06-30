@@ -1,8 +1,15 @@
-import React from 'react';
+// ListViewer.jsx
+import React, { useState } from 'react';
 import { useFetchListsQuery } from '../../redux/features/lists/listApiSlice';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { LuRefreshCw } from "react-icons/lu";
+import { IoMdCreate } from "react-icons/io";
+import InitList from './InitList';
 
 const ListViewer = () => {
+  const [showInitList, setShowInitList] = useState(false);
+  const navigate = useNavigate();
+
   const {
     data: lists = [],
     error,
@@ -11,24 +18,48 @@ const ListViewer = () => {
     isFetching,
   } = useFetchListsQuery();
 
+  const handleCreateListClick = () => {
+    setShowInitList(true);
+  };
+
+  const handleListCreated = (newListId) => {
+    setShowInitList(false);
+    navigate(`/lists/${newListId}`);
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Your Lists</h1>
-        <button
-          onClick={refetch}
-          className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-          disabled={isFetching}
-        >
-          {/* Replace ICON REFRESH with your icon */}
-          <span className="w-4 h-4 mr-2">🔄</span>
-          Refresh
-        </button>
+        <div className="flex gap-2">
+          <div>
+            <button
+              onClick={handleCreateListClick}
+              className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              <span className='mr-2'><IoMdCreate /></span>
+              Create Your List
+            </button>
+          </div>
+          <button
+            onClick={refetch}
+            className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+            disabled={isFetching}
+          >
+            <span className="mr-2"><LuRefreshCw /></span>
+            Refresh
+          </button>
+        </div>
       </div>
+
+      {showInitList && (
+        <div className="mb-6">
+          <InitList onListCreated={handleListCreated} onClose={() => setShowInitList(false)} />
+        </div>
+      )}
 
       {isLoading && (
         <div className="flex justify-center items-center py-12">
-          {/* Replace ICON LOADER with your loader icon */}
           <span className="animate-spin w-8 h-8 text-gray-600">⏳</span>
         </div>
       )}
@@ -45,8 +76,8 @@ const ListViewer = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {lists.map(list => (
-          <Link to={`/lists/${list._id}`}>
-            <div key={list._id} className="shadow-md p-4 border rounded bg-white">
+          <Link to={`/lists/${list._id}`} key={list._id}>
+            <div className="shadow-md p-4 border rounded bg-white">
               <h2 className="text-xl font-semibold mb-1">{list.title}</h2>
               <p className="text-sm text-gray-600 mb-2">{list.description}</p>
               <div className="text-xs text-gray-500 mb-2">
