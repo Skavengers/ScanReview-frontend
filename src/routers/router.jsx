@@ -3,7 +3,7 @@ import App from "../App";
 import Home from "../pages/home/Home";
 import Login from "../components/Login";
 import Register from "../components/Register";
-import CartPage from "../pages/books/CartPage";
+//import CartPage from "../pages/books/CartPage";
 import SingleBook from "../pages/books/SingleBook";
 import PrivateRoute from "./PrivateRoute";
 import AdminRoute from "./AdminRoute";
@@ -39,11 +39,6 @@ const router = createBrowserRouter([
                 path: "/register",
                 element: <Register />
             },
-            {
-                path: "/cart",
-                element: <CartPage />
-            },
-
             {
                 path: "/books/:id",
                 element: <SingleBook />
