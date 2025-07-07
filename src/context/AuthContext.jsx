@@ -8,6 +8,7 @@ import {
   onAuthStateChanged
 } from "firebase/auth";
 import { GoogleAuthProvider } from "firebase/auth";
+import { refreshToken, decodeToken } from "../utils/authUtils";
 
 const AuthContext = createContext();
 
@@ -17,7 +18,7 @@ export const useAuth = () => {
 
 const googleProvider = new GoogleAuthProvider();
 
-export const AuthProvide = ({ children }) => {
+export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -36,12 +37,27 @@ export const AuthProvide = ({ children }) => {
   const loginUser = async (email, password) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      return userCredential.user;
+      const { user } = userCredential;
+
+      // Make an API call to your backend to get tokens
+      const response = await axios.post(`${getBaseUrl()}/auth/login`, {
+        email,
+        password,
+      });
+
+      const { token, refreshToken } = response.data;
+
+      // Store tokens in localStorage
+      localStorage.setItem('token', token);
+      localStorage.setItem('refreshToken', refreshToken);
+
+      return user;
     } catch (error) {
       console.error("Login error:", error);
       throw error;
     }
   };
+
 
   // Sign in with Google
   const signInWithGoogle = async () => {

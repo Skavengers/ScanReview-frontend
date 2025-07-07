@@ -52,7 +52,7 @@ const router = createBrowserRouter([
                 element: <ListViewer />
             },
             {
-                path: "/lists/modify-list",
+                path: "/lists/modify-list/:id",
                 element: <PrivateRoute><ModifyList /></PrivateRoute>
             },
             {

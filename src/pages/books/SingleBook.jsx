@@ -5,15 +5,13 @@ import SingleImageDisplay from '../../components/SingleImageDisplay';
 import { useFetchBookByIdQuery } from '../../redux/features/books/booksApi';
 import { useFetchUserInteractionsQuery, useSaveUserInteractionMutation } from '../../redux/features/userInteractions/userInteractionsApi';
 import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
-import { useDispatch } from 'react-redux';
 
 const SingleBook = () => {
   const { id } = useParams();
   const { currentUser } = useAuth();
-  const { data: book, isLoading, isError } = useFetchBookByIdQuery(id);
-  const { data: userInteraction } = useFetchUserInteractionsQuery({ userId: currentUser?.uid, bookId: id });
-  const [saveUserInteraction] = useSaveUserInteractionMutation();
-
+  const { data: book, isLoading: isBookLoading, isError: isBookError } = useFetchBookByIdQuery(id);
+  const { data: userInteraction, isLoading: isInteractionLoading, isError: isInteractionError } = useFetchUserInteractionsQuery({ userId: currentUser?.uid, bookId: id });
+  const [saveUserInteraction, { isLoading: isSaving }] = useSaveUserInteractionMutation();
   const [userRating, setUserRating] = useState(0);
   const [userStatus, setUserStatus] = useState('');
   const [userNote, setUserNote] = useState('');
@@ -29,19 +27,23 @@ const SingleBook = () => {
 
   const saveInteraction = async (interactionData) => {
     try {
-      await saveUserInteraction(interactionData).unwrap();
-    } catch (error) {
-      console.error('Error saving interaction:', error);
+      const interactionWithType = {
+        ...interactionData,
+        interactionType: 'rating' // or another appropriate type based on your logic
+      };
+      await saveUserInteraction(interactionWithType).unwrap();
+      setError('');
+    } catch (err) {
+      console.error('Error saving interaction:', err);
       setError('Failed to save interaction. Please try again.');
     }
   };
 
   const handleStarClick = async (ratingValue) => {
     if (!currentUser) {
-      alert('You need to be logged in to rate this book.');
+      setError('You need to be logged in to rate this book.');
       return;
     }
-
     setUserRating(ratingValue);
     await saveInteraction({
       userId: currentUser.uid,
@@ -54,12 +56,10 @@ const SingleBook = () => {
 
   const handleStatusToggle = async (status) => {
     if (!currentUser) {
-      alert('You need to be logged in to change your reading status.');
+      setError('You need to be logged in to change your reading status.');
       return;
     }
-
     setUserStatus(status);
-
     await saveInteraction({
       userId: currentUser.uid,
       bookId: id,
@@ -71,19 +71,17 @@ const SingleBook = () => {
 
   const handleNoteChange = (event) => {
     if (!currentUser) {
-      alert('You need to be logged in to add or modify notes.');
+      setError('You need to be logged in to add or modify notes.');
       return;
     }
-
     setUserNote(event.target.value);
   };
 
   const saveNote = async () => {
     if (!currentUser) {
-      alert('You need to be logged in to save notes.');
+      setError('You need to be logged in to save notes.');
       return;
     }
-
     await saveInteraction({
       userId: currentUser.uid,
       bookId: id,
@@ -97,19 +95,15 @@ const SingleBook = () => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating - fullStars >= 0.5;
-
     for (let i = 0; i < fullStars; i++) {
       stars.push(<FaStar key={`full-${i}`} className="text-yellow-500" />);
     }
-
     if (hasHalfStar) {
       stars.push(<FaStarHalfAlt key="half" className="text-yellow-500" />);
     }
-
     while (stars.length < 5) {
       stars.push(<FaRegStar key={`empty-${stars.length}`} className="text-yellow-500" />);
     }
-
     return stars;
   };
 
@@ -117,12 +111,15 @@ const SingleBook = () => {
     return starRating * 2;
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error happened while loading book info</div>;
+  if (isBookLoading || isInteractionLoading) return <div>Loading...</div>;
+  if (isBookError) return <div>Error happened while loading book info</div>;
+  if (isInteractionError) return <div>Error happened while loading user interactions</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-6">
+      {error && <div className="text-red-500 text-center mb-4">{error}</div>}
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        {/* Render book details and interaction UI */}
         <div className="md:flex">
           <div className="md:flex-shrink-0 p-6 flex justify-center items-center">
             <SingleImageDisplay
@@ -184,8 +181,9 @@ const SingleBook = () => {
                 <button
                   onClick={saveNote}
                   className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+                  disabled={isSaving}
                 >
-                  Save Note
+                  {isSaving ? 'Saving...' : 'Save Note'}
                 </button>
               )}
             </div>
@@ -199,7 +197,7 @@ const SingleBook = () => {
                 key={status}
                 onClick={() => handleStatusToggle(status)}
                 className={`px-4 py-2 rounded-lg ${userStatus === status ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-                disabled={!currentUser}
+                disabled={!currentUser || isSaving}
               >
                 {status.replace('_', ' ')}
               </button>

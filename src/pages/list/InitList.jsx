@@ -3,9 +3,11 @@ import React, { useState } from 'react';
 import { useCreateListMutation } from '../../redux/features/lists/listApiSlice';
 import { useAuth } from '../../context/AuthContext';
 import { IoClose } from "react-icons/io5"; // Importing an icon for the close button
+import { useNavigate } from 'react-router-dom';
 
 const InitList = ({ onListCreated, onClose }) => {
   const { currentUser } = useAuth();
+  const navigate = useNavigate();
   const [createList, { isLoading }] = useCreateListMutation();
   const [formData, setFormData] = useState({
     title: '',
@@ -29,32 +31,12 @@ const InitList = ({ onListCreated, onClose }) => {
     }));
   };
 
-  const handleAddTag = () => {
-    if (tagInput.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }));
-      setTagInput('');
-    }
-  };
-
-  const handleAddItem = () => {
-    if (newItem.id) {
-      setFormData(prev => ({
-        ...prev,
-        items: [...prev.items, newItem],
-      }));
-      setNewItem({ id: '', rank: newItem.rank + 1, explanation: '' });
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const result = await createList(formData).unwrap();
       alert('Liste créée avec succès !');
-      onListCreated(result._id); // Assuming the response contains the new list's ID
+      navigate(`/lists/modify-list/${result._id}`); // redirect to ModifyList
     } catch (err) {
       alert(err?.data?.message || 'Échec de la création de la liste');
     }

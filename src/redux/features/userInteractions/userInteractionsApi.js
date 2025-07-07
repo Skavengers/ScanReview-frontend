@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import getBaseUrl from '../../../utils/baseURL';
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: `${getBaseUrl()}/api/auth`, // Adjusted base URL
+  baseUrl: `${getBaseUrl()}/api/auth`,
   credentials: 'include',
   prepareHeaders: (headers) => {
     const token = localStorage.getItem('token');
@@ -20,25 +20,37 @@ const userInteractionsApi = createApi({
   endpoints: (builder) => ({
     fetchUserInteractions: builder.query({
       query: ({ userId, bookId }) => ({
-        url: `/interactions?userId=${userId}&bookId=${bookId}`, // Adjusted URL
+        url: `/interactions?userId=${userId}&bookId=${bookId}`,
         method: 'GET',
       }),
       transformErrorResponse: (response) => {
         console.error('Error response:', response);
-        return response.data || { error: 'An unknown error occurred' };
+        if (response.status === 404) {
+          return { error: 'User interactions not found' };
+        } else if (response.status === 401) {
+          return { error: 'Unauthorized access' };
+        } else {
+          return response.data || { error: 'An unknown error occurred' };
+        }
       },
       providesTags: ['UserInteractions'],
     }),
     saveUserInteraction: builder.mutation({
       query: ({ userId, bookId, ...rest }) => ({
-        url: '/interactions', // Adjusted URL
+        url: '/interactions',
         method: 'POST',
         body: { userId, bookId, ...rest },
       }),
       invalidatesTags: ['UserInteractions'],
       transformErrorResponse: (response) => {
         console.error('Error response:', response);
-        return response.data || { error: 'An unknown error occurred' };
+        if (response.status === 400) {
+          return { error: 'Bad request: User ID, Book ID, and Interaction Type are required' };
+        } else if (response.status === 401) {
+          return { error: 'Unauthorized access' };
+        } else {
+          return response.data || { error: 'An unknown error occurred' };
+        }
       },
     }),
   }),
