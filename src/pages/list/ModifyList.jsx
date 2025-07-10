@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useFetchListByIdQuery, useUpdateListMutation } from '../../redux/features/lists/listApiSlice';
-import axiosInstance from '../../utils/axiosInstance'; // ensure this exists
+import {
+  useFetchListByIdQuery,
+  useUpdateListMutation,
+  useDeleteListMutation,
+} from '../../redux/features/lists/listApiSlice';
+import axiosInstance from '../../utils/axiosInstance';
 
 const ModifyList = () => {
   const { currentUser } = useAuth();
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const { data, isLoading, error } = useFetchListByIdQuery(id);
   const [updateList, { isLoading: isUpdating }] = useUpdateListMutation();
+  const [deleteList, { isLoading: isDeleting }] = useDeleteListMutation();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -34,6 +41,7 @@ const ModifyList = () => {
         items: data.items || [],
         isPublic: data.isPublic ?? true,
       });
+
       const maxRank = Math.max(0, ...data.items.map(item => item.rank || 0));
       setNewItem({ id: '', rank: maxRank + 1, explanation: '' });
     }
@@ -42,10 +50,9 @@ const ModifyList = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const payload = { ...formData }; // exclude createdBy
+      const payload = { ...formData };
       await updateList({ id, ...payload }).unwrap();
 
-      // Optional: log the update for auditing
       await axiosInstance.post('/your-endpoint', {
         ...payload,
         userId: currentUser.uid,
@@ -56,6 +63,20 @@ const ModifyList = () => {
     } catch (err) {
       console.error(err);
       alert('Failed to update list');
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmed = window.confirm('Are you sure you want to delete this list?');
+    if (!confirmed) return;
+  
+    try {
+      await deleteList(id).unwrap();
+      alert('List deleted successfully');
+      navigate(`/lists/`);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete list');
     }
   };
 
@@ -230,6 +251,15 @@ const ModifyList = () => {
           className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
         >
           {isUpdating ? 'Updating...' : 'Update List'}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="w-full py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+        >
+          {isDeleting ? 'Deleting...' : 'Delete List'}
         </button>
       </form>
     </div>
