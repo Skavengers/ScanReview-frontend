@@ -116,7 +116,7 @@ const SingleBook = () => {
   if (isInteractionError) return <div>Error happened while loading user interactions</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br">
       {error && <div className="text-red-500 text-center mb-4">{error}</div>}
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
         {/* Render book details and interaction UI */}
@@ -153,6 +153,9 @@ const SingleBook = () => {
                 {renderStars(book.stats?.average_rating || 0)}
               </div>
             </div>
+            {
+              currentUser ?
+            <div>  
             <div className="mt-4">
               <span className="font-semibold text-gray-900">Rate this book:</span>
               <div className="flex mt-2">
@@ -168,6 +171,7 @@ const SingleBook = () => {
                 })}
               </div>
             </div>
+
             <div className="mt-4">
               <span className="font-semibold text-gray-900">Your Notes:</span>
               <textarea
@@ -186,7 +190,11 @@ const SingleBook = () => {
                   {isSaving ? 'Saving...' : 'Save Note'}
                 </button>
               )}
-            </div>
+            </div></div>
+
+            : 
+            ""
+            }
           </div>
         </div>
         <div className="px-8 py-6 bg-gray-50">

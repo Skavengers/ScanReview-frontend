@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useFetchListByIdQuery, useUpdateListMutation } from '../../redux/features/lists/listApiSlice';
+import axiosInstance from '../../utils/axiosInstance'; // ensure this exists
 
 const ModifyList = () => {
-  const { currentUser } = useAuth(); // by writing currentUser.displayName you got the string name of the user
-  const { id } = useParams(); // this is the id of the book
+  const { currentUser } = useAuth();
+  const { id } = useParams();
   const { data, isLoading, error } = useFetchListByIdQuery(id);
   const [updateList, { isLoading: isUpdating }] = useUpdateListMutation();
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -16,6 +19,7 @@ const ModifyList = () => {
     items: [],
     isPublic: true,
   });
+
   const [tagInput, setTagInput] = useState('');
   const [newItem, setNewItem] = useState({ id: '', rank: 1, explanation: '' });
 
@@ -29,7 +33,6 @@ const ModifyList = () => {
         tags: data.tags || [],
         items: data.items || [],
         isPublic: data.isPublic ?? true,
-        createdBy: data.createdBy,
       });
       const maxRank = Math.max(0, ...data.items.map(item => item.rank || 0));
       setNewItem({ id: '', rank: maxRank + 1, explanation: '' });
@@ -39,19 +42,22 @@ const ModifyList = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateList({ id, ...formData }).unwrap();
-      const response = await axiosInstance.post('/your-endpoint', {
-        ...formData,
+      const payload = { ...formData }; // exclude createdBy
+      await updateList({ id, ...payload }).unwrap();
+
+      // Optional: log the update for auditing
+      await axiosInstance.post('/your-endpoint', {
+        ...payload,
         userId: currentUser.uid,
         displayName: currentUser.displayName || 'Unknown',
       });
+
       alert('List updated successfully!');
     } catch (err) {
       console.error(err);
       alert('Failed to update list');
     }
   };
-
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -164,6 +170,7 @@ const ModifyList = () => {
             /> Private
           </label>
         </div>
+
         <div>
           <label className="font-semibold">Tags</label>
           <div className="flex gap-2 mb-2">
@@ -187,6 +194,7 @@ const ModifyList = () => {
             ))}
           </div>
         </div>
+
         <div>
           <label className="font-semibold">Items</label>
           {formData.items.map((item, index) => (
@@ -215,6 +223,7 @@ const ModifyList = () => {
             </button>
           </div>
         </div>
+
         <button
           type="submit"
           disabled={isUpdating}

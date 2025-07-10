@@ -1,21 +1,27 @@
-// SingleListViewer.jsx
 import React from 'react';
 import { useFetchListByIdQuery } from '../../redux/features/lists/listApiSlice';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext'; // optional usage
 import { IoMdCreate } from "react-icons/io";
 import { Link } from 'react-router-dom';
+
 const SingleListViewer = () => {
-  const { currentUser } = useAuth();
+  let currentUser = null;
+  try {
+    const auth = useAuth();
+    currentUser = auth?.currentUser || null;
+  } catch (err) {
+    // Auth context not available or not used — safe fallback
+    currentUser = null;
+  }
+
   const { id } = useParams();
   const { data: list, isLoading, isError } = useFetchListByIdQuery(id);
   const navigate = useNavigate();
 
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Error happened while loading list info</div>;
-  if (!list) {
-    return <div className="text-center py-8">No list found.</div>;
-  }
+  if (!list) return <div className="text-center py-8">No list found.</div>;
 
   const handleModifyClick = () => {
     navigate(`/lists/modify-list/${id}`);
@@ -25,7 +31,7 @@ const SingleListViewer = () => {
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
       <div className='flex justify-between items-center mb-6'>
         <h2 className="text-2xl font-bold mb-2">{list.title}</h2>
-        {currentUser.displayName === list.createdBy && (
+        {currentUser?.displayName === list.createdBy && (
           <button
             onClick={handleModifyClick}
             className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
