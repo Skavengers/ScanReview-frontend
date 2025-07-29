@@ -16,6 +16,7 @@ const SingleBook = () => {
   const [userStatus, setUserStatus] = useState('');
   const [userNote, setUserNote] = useState('');
   const [error, setError] = useState('');
+  const [showFullSynopsis, setShowFullSynopsis] = useState(false);
 
   useEffect(() => {
     if (userInteraction) {
@@ -29,7 +30,7 @@ const SingleBook = () => {
     try {
       const interactionWithType = {
         ...interactionData,
-        interactionType: 'rating' // or another appropriate type based on your logic
+        interactionType: 'rating'
       };
       await saveUserInteraction(interactionWithType).unwrap();
       setError('');
@@ -64,7 +65,7 @@ const SingleBook = () => {
       userId: currentUser.uid,
       bookId: id,
       rating: userRating,
-      status: status,
+      status,
       note: userNote,
     });
   };
@@ -107,130 +108,151 @@ const SingleBook = () => {
     return stars;
   };
 
-  const convertStarRatingToGrade = (starRating) => {
-    return starRating * 2;
-  };
+  const convertStarRatingToGrade = (starRating) => starRating * 2;
 
   if (isBookLoading || isInteractionLoading) return <div>Loading...</div>;
   if (isBookError) return <div>Error happened while loading book info</div>;
   if (isInteractionError) return <div>Error happened while loading user interactions</div>;
 
+  const MAX_LENGTH = 500;
+  const isLongSynopsis = book?.description?.length > MAX_LENGTH;
+  const displayedSynopsis = !showFullSynopsis && isLongSynopsis
+    ? book.description.slice(0, MAX_LENGTH) + "..."
+    : book.description;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br">
+    <div className="min-h-screen bg-gray-100 p-2">
       {error && <div className="text-red-500 text-center mb-4">{error}</div>}
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-        {/* Render book details and interaction UI */}
-        <div className="md:flex">
-          <div className="md:flex-shrink-0 p-6 flex justify-center items-center">
+      <div className="grid grid-cols-2 gap-2 max-w-6xl mx-auto">
+        {/* Left Column */}
+        <div className="flex flex-col items-center text-sm">
+          <div className="rounded-xl shadow-md p-2 w-full bg-orange-200">
+            <p className="text-xs text-gray-800">{book.meta?.status || "N/A"}</p>
+            <h1 className="text-lg font-bold text-gray-900 break-words">{book.title}</h1>
+            <p className="mt-1 text-gray-600 text-sm">{book?.authors?.join(', ') || "Unknown"}</p>
+          </div>
+          <div className="p-2 w-full flex justify-center items-center h-full">
             <SingleImageDisplay
-              className="rounded-lg w-full max-w-md h-auto shadow-md"
+              className="rounded-lg w-full max-w-[200px] sm:max-w-[300px] h-auto sm:h-full object-cover shadow-md"
               pictureUrl={book.picture_url}
             />
           </div>
-          <div className="p-8">
-            <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold">Book</div>
-            <h1 className="block mt-1 text-3xl leading-tight font-bold text-gray-900">{book.title}</h1>
-            <div className="mt-2 text-gray-600">
-              <p className="mt-2">
-                <span className="font-semibold text-gray-900">Author:</span> {book?.authors?.join(', ') || "Unknown"}
-              </p>
-              <p className="mt-2">
-                <span className="font-semibold text-gray-900">Published:</span> {book.meta?.publication_period || "N/A"}
-              </p>
-              <p className="mt-2">
-                <span className="font-semibold text-gray-900">Status:</span> {book.meta?.status || "N/A"}
-              </p>
-              <p className="mt-2">
-                <span className="font-semibold text-gray-900">Genres:</span> {(book.genres ?? []).join(', ')}
-              </p>
+          {/* Average Rating and Genres for mobile view */}
+          <div className="w-full sm:hidden">
+            <div className="bg-white rounded-xl shadow-md border-primary border-4 p-2 flex flex-col items-center justify-center text-center mt-2">
+              <h2 className="text-base font-semibold text-gray-900 mb-1">Average Rating</h2>
+              <span className="font-semibold text-lg">
+                {book.stats?.average_rating || 0}
+              </span>
             </div>
-            <p className="mt-4 text-gray-700 leading-relaxed">
-              <span className="font-semibold text-gray-900">Description:</span> {book?.description}
-            </p>
-            <div className="mt-6 flex items-center">
-              <span className="font-semibold text-gray-900 mr-4">Rating: {book.stats?.average_rating || 0} ({convertStarRatingToGrade(book.stats?.average_rating || 0)})</span>
-              <div className="flex">
-                {renderStars(book.stats?.average_rating || 0)}
-              </div>
+            <div className="bg-white rounded-xl shadow-md p-2 mt-2">
+              <h2 className="text-base font-semibold text-gray-900">Genres</h2>
+              <p className="mt-1 text-gray-700 text-xs">{(book.genres ?? []).join(', ') || "N/A"}</p>
             </div>
-            {
-              currentUser ?
-            <div>  
-            <div className="mt-4">
-              <span className="font-semibold text-gray-900">Rate this book:</span>
-              <div className="flex mt-2">
-                {[...Array(5)].map((_, index) => {
-                  const starValue = index + 1;
-                  return (
-                    <FaStar
-                      key={starValue}
-                      className={`cursor-pointer ${userRating >= starValue ? 'text-yellow-500' : 'text-gray-300'}`}
-                      onClick={() => handleStarClick(starValue)}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <span className="font-semibold text-gray-900">Your Notes:</span>
-              <textarea
-                className="mt-2 w-full p-2 border rounded"
-                value={userNote}
-                onChange={handleNoteChange}
-                placeholder="Write your notes here..."
-                disabled={!currentUser}
-              />
-              {currentUser && (
-                <button
-                  onClick={saveNote}
-                  className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-                  disabled={isSaving}
-                >
-                  {isSaving ? 'Saving...' : 'Save Note'}
-                </button>
-              )}
-            </div></div>
-
-            : 
-            ""
-            }
           </div>
         </div>
-        <div className="px-8 py-6 bg-gray-50">
-          <h3 className="text-lg font-semibold text-gray-900">Your Reading Status</h3>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-5">
+
+        {/* Right Column */}
+        <div className="flex flex-col gap-2 text-sm">
+          <div className="bg-white rounded-xl shadow-md p-2">
+            <h2 className="text-base font-semibold text-gray-900">Synopsis</h2>
+            <p className="mt-1 text-gray-700 whitespace-pre-line text-xs">{displayedSynopsis}</p>
+            {isLongSynopsis && (
+              <button
+                className="mt-1 text-indigo-600 hover:underline text-xs"
+                onClick={() => setShowFullSynopsis(!showFullSynopsis)}
+              >
+                {showFullSynopsis ? "Read Less" : "Read More"}
+              </button>
+            )}
+          </div>
+          {/* Average Rating and Genres for desktop view */}
+          <div className="hidden sm:block">
+            <div className="bg-white rounded-xl shadow-md border-primary border-4 p-2 flex flex-col items-center justify-center text-center">
+              <h2 className="text-base font-semibold text-gray-900 mb-1">Average Rating</h2>
+              <span className="font-semibold text-lg">
+                {book.stats?.average_rating || 0}
+              </span>
+            </div>
+            <div className="bg-white rounded-xl shadow-md p-2">
+              <h2 className="text-base font-semibold text-gray-900">Genres</h2>
+              <p className="mt-1 text-gray-700 text-xs">{(book.genres ?? []).join(', ') || "N/A"}</p>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl shadow-lg p-2 sm:p-4 w-full max-h-72 sm:max-h-96 overflow-y-auto text-xs sm:text-sm text-gray-600">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 sm:mb-4 md:mb-10">Additional Information</h2>
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 md:m-6">
+              <div>
+                <p className="font-medium">Views</p>
+                <p className="text-gray-900">{book.stats?.total_views || 0}</p>
+              </div>
+              <div>
+                <p className="font-medium">Favorites</p>
+                <p className="text-gray-900">{book.stats?.favorite_count || 0}</p>
+              </div>
+              <div>
+                <p className="font-medium">Comments</p>
+                <p className="text-gray-900">{book.stats?.comments_count || 0}</p>
+              </div>
+              <div>
+                <p className="font-medium">Reviews</p>
+                <p className="text-gray-900">{book.stats?.review_count || 0}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Section */}
+      <div className="max-w-6xl mx-auto mt-4 bg-white rounded-xl shadow-md p-4 space-y-4">
+        {currentUser && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Your Rating</h2>
+            <div className="flex mt-2">
+              {[...Array(5)].map((_, index) => {
+                const starValue = index + 1;
+                return (
+                  <FaStar
+                    key={starValue}
+                    className={`cursor-pointer ${userRating >= starValue ? 'text-yellow-500' : 'text-gray-300'}`}
+                    onClick={() => handleStarClick(starValue)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {currentUser && (
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Your Notes</h2>
+            <textarea
+              className="mt-2 w-full p-2 border rounded text-xs"
+              value={userNote}
+              onChange={handleNoteChange}
+              placeholder="Write your notes here..."
+            />
+            <button
+              onClick={saveNote}
+              className="mt-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs"
+              disabled={isSaving}
+            >
+              {isSaving ? 'Saving...' : 'Save Note'}
+            </button>
+          </div>
+        )}
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Your Reading Status</h2>
+          <div className="mt-4 flex flex-wrap gap-2">
             {['reading', 'completed', 'on_hold', 'dropped', 'plan_to_read'].map((status) => (
               <button
                 key={status}
                 onClick={() => handleStatusToggle(status)}
-                className={`px-4 py-2 rounded-lg ${userStatus === status ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                className={`px-3 py-1 rounded-lg text-xs ${userStatus === status ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
                 disabled={!currentUser || isSaving}
               >
                 {status.replace('_', ' ')}
               </button>
             ))}
-          </div>
-        </div>
-        <div className="px-8 py-6 bg-gray-100">
-          <h3 className="text-lg font-semibold text-gray-900">Additional Information</h3>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Total Views</p>
-              <p className="mt-1 text-lg font-semibold text-gray-900">{book.stats?.total_views || 0}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Favorite Count</p>
-              <p className="mt-1 text-lg font-semibold text-gray-900">{book.stats?.favorite_count || 0}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Comments Count</p>
-              <p className="mt-1 text-lg font-semibold text-gray-900">{book.stats?.comments_count || 0}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Reviews Count</p>
-              <p className="mt-1 text-lg font-semibold text-gray-900">{book.stats?.review_count || 0}</p>
-            </div>
           </div>
         </div>
       </div>

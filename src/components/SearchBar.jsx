@@ -38,12 +38,12 @@ const SearchBar = () => {
   };
 
   return (
-    <div className="relative w-full bg-[#EAEAEA] rounded-md flex items-center px-6 md:px-8 py-2 shadow-sm focus:outline-none">
+    <div className="relative w-full bg-[#EAEAEA] rounded-md flex items-center px-4 md:px-6 py-2 shadow-sm focus:outline-none">
       
-      <FaSearch className='  mr-2 inline-block left-3 inset-y-2'/>
+      <FaSearch className='  mr-2 inline-block left-2 inset-y-2'/>
       <input
         type="text"
-        placeholder="Search by title, alternate title, or author"
+        placeholder="Search..."
         value={searchTerm}
         onChange={handleSearch}
         onKeyDown={handleKeyDown}
