@@ -5,10 +5,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LuRefreshCw } from "react-icons/lu";
 import { IoMdCreate } from "react-icons/io";
 import InitList from './InitList';
+import { useAuth } from '../../context/AuthContext';
 
 const ListViewer = () => {
   const [showInitList, setShowInitList] = useState(false);
+  const [authWarning, setAuthWarning] = useState('');
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   const {
     data: lists = [],
@@ -19,6 +22,11 @@ const ListViewer = () => {
   } = useFetchListsQuery();
 
   const handleCreateListClick = () => {
+    if (!currentUser) {
+      setAuthWarning('You need to be logged in to create a list.');
+      return;
+    }
+    setAuthWarning('');
     setShowInitList(true);
   };
 
@@ -31,8 +39,8 @@ const ListViewer = () => {
     <div className="p-6 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Your Lists</h1>
-        <div className="flex gap-2">
-          <div>
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex gap-2">
             <button
               onClick={handleCreateListClick}
               className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -40,15 +48,18 @@ const ListViewer = () => {
               <span className='mr-2'><IoMdCreate /></span>
               Create Your List
             </button>
+            <button
+              onClick={refetch}
+              className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+              disabled={isFetching}
+            >
+              <span className="mr-2"><LuRefreshCw /></span>
+              Refresh
+            </button>
           </div>
-          <button
-            onClick={refetch}
-            className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-            disabled={isFetching}
-          >
-            <span className="mr-2"><LuRefreshCw /></span>
-            Refresh
-          </button>
+          {authWarning && (
+            <div className="text-red-600 text-sm">{authWarning}</div>
+          )}
         </div>
       </div>
 
