@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FaUser, FaListOl } from "react-icons/fa";
 import avatarImg from "../assets/profil_discord.png";
@@ -15,10 +15,23 @@ const navigation = [
 const Navbar = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { currentUser, logout } = useAuth();
+  const dropdownRef = useRef(null);
 
   const handleLogOut = () => {
     logout();
   };
+
+  // Close dropdown if clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <header className="max-w-screen-2xl mx-auto px-4 py-4">
@@ -37,14 +50,14 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Right Side: User Logo and TierList */}
+        {/* Right Side: User Icon and Tier List */}
         <div className="flex items-center space-x-2">
-          <div className="relative group">
+          <div className="relative" ref={dropdownRef}>
             {currentUser ? (
               <>
                 <button
-                  onMouseEnter={() => setIsDropdownOpen(true)}
-                  onMouseLeave={() => setIsDropdownOpen(false)}
+                  onClick={() => setIsDropdownOpen((prev) => !prev)}
+                  className="focus:outline-none"
                 >
                   <img
                     src={avatarImg}
@@ -54,22 +67,20 @@ const Navbar = () => {
                 </button>
                 {isDropdownOpen && (
                   <div
-                    className="absolute left-1/2 transform -translate-x-1/2 bottom-0 translate-y-full mb-2 w-48 bg-white shadow-lg rounded-md z-40"
-                    onMouseEnter={() => setIsDropdownOpen(true)}
-                    onMouseLeave={() => setIsDropdownOpen(false)}
+                    className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-40"
                   >
                     <ul>
                       {navigation.map((item) => (
                         <li key={item.name} className="hover:bg-gray-100">
-                          <a href={item.href} className="block px-4 py-2 text-sm">
+                          <Link to={item.href} className="block px-4 py-2 text-sm">
                             {item.name}
-                          </a>
+                          </Link>
                         </li>
                       ))}
                       <li className="hover:bg-gray-100">
                         <button
                           onClick={handleLogOut}
-                          className="block w-full px-4 py-2 text-sm"
+                          className="block w-full px-4 py-2 text-sm text-left"
                         >
                           Logout
                         </button>
@@ -79,19 +90,21 @@ const Navbar = () => {
                 )}
               </>
             ) : (
-              <a href="/login">
+              <Link to="/login">
                 <FaUser className="size-5 sm:size-6" />
-              </a>
+              </Link>
             )}
           </div>
-          <div className="bg-red-500 text-white p-2 rounded-2xl flex">
+
+          {/* Tier List Button */}
+          <div className="bg-red-500 text-white px-3 py-1 rounded-2xl flex mt-1 mb-2 pb-2 pt-2">
             <Link to="/lists" className="flex items-center text-xs sm:text-sm">
               <FaListOl className="mr-1 sm:mr-2 size-3 sm:size-4" /> TierList
             </Link>
           </div>
         </div>
 
-        {/* Search Bar for Mobile */}
+        {/* Mobile Search Bar */}
         <div className="w-full sm:hidden mt-2">
           <SearchBar />
         </div>
