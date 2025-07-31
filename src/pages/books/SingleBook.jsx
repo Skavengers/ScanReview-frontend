@@ -129,10 +129,8 @@ const saveInteraction = async (interactionData) => {
   const displayedSynopsis = !showFullSynopsis && isLongSynopsis
     ? book.description.slice(0, MAX_LENGTH) + "..."
     : book.description;
-
   return (
     <div className="min-h-screen bg-gray-100 p-2">
-      <button onClick={() => refetch()}>Refetch Data</button>
       {error && <div className="text-red-500 text-center mb-4">{error}</div>}
       <div className="grid grid-cols-2 gap-2 max-w-6xl mx-auto">
         {/* Left Column */}
