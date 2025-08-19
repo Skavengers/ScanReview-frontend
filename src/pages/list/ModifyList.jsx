@@ -1,6 +1,8 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useFetchBookByIdQuery } from '../../redux/features/books/booksApi';
 import {
   useFetchListByIdQuery,
   useUpdateListMutation,
@@ -10,6 +12,7 @@ import axiosInstance from '../../utils/axiosInstance';
 
 const ModifyList = () => {
   const { currentUser } = useAuth();
+  const idUser = currentUser.displayName;
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -51,14 +54,7 @@ const ModifyList = () => {
     e.preventDefault();
     try {
       const payload = { ...formData };
-      await updateList({ id, ...payload }).unwrap();
-
-      await axiosInstance.post('/your-endpoint', {
-        ...payload,
-        userId: currentUser.uid,
-        displayName: currentUser.displayName || 'Unknown',
-      });
-
+      await updateList({ id , ...payload }).unwrap();
       alert('List updated successfully!');
     } catch (err) {
       console.error(err);
@@ -103,6 +99,7 @@ const ModifyList = () => {
     }));
   };
 
+
   const handleAddItem = () => {
     if (newItem.id) {
       setFormData(prev => ({
@@ -112,6 +109,7 @@ const ModifyList = () => {
       setNewItem({ id: '', rank: newItem.rank + 1, explanation: '' });
     }
   };
+
 
   const handleRemoveItem = (index) => {
     const updatedItems = [...formData.items];
@@ -239,7 +237,12 @@ const ModifyList = () => {
               onChange={(e) => setNewItem({ ...newItem, explanation: e.target.value })}
               className="p-2 border rounded"
             />
-            <button type="button" onClick={handleAddItem} className="px-4 py-2 bg-gray-300 rounded">
+            <button
+              type="button"
+              onClick={handleAddItem}
+              className="px-4 py-2 bg-gray-300 rounded"
+              disabled={!newItem.id}
+            >
               Add Item
             </button>
           </div>
