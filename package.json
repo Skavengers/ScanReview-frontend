@@ -16,6 +16,7 @@
     "chart.js": "^4.4.9",
     "date-fns": "^4.1.0",
     "firebase": "^11.6.1",
+    "motion": "^12.23.12",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",

@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import SingleImageDisplay from '../../components/SingleImageDisplay';
 import { useFetchBookByIdQuery } from '../../redux/features/books/booksApi';
 import { useFetchUserInteractionsQuery, useSaveUserInteractionMutation } from '../../redux/features/userInteractions/userInteractionsApi';
 import { FaStar } from 'react-icons/fa';
+import TiltedCard from '../../components/TiltedCard';
 
+
+  
 const SingleBook = () => {
   const { id } = useParams();
   const { currentUser } = useAuth();
@@ -136,15 +139,42 @@ const saveInteraction = async (interactionData) => {
         {/* Left Column */}
         <div className="flex flex-col items-center text-sm">
           <div className="rounded-xl shadow-md p-2 w-full bg-orange-200">
-            <p className="text-xs text-gray-800">{book.meta?.status || "N/A"}</p>
             <h1 className="text-lg font-bold text-gray-900 break-words">{book.title}</h1>
             <p className="mt-1 text-gray-600 text-sm">{book?.authors?.join(', ') || "Unknown"}</p>
           </div>
           <div className="p-2 w-full flex justify-center items-center h-full">
-            <SingleImageDisplay
-              className="rounded-lg w-full max-w-[200px] sm:max-w-[300px] h-auto sm:h-full object-cover shadow-md"
-              pictureUrl={book.picture_url}
-            />
+{window.innerWidth >= 1024 ? (
+  <TiltedCard
+    imageSrc={book.picture_url}
+    altText={book.title}
+    captionText={book.title}
+    containerHeight="400px"
+    containerWidth="300px"
+    imageHeight="420px"
+    imageWidth="310px"
+    rotateAmplitude={12}
+    scaleOnHover={1.2}
+    showMobileWarning={false}
+    showTooltip={true}
+    displayOverlayContent={true}
+    overlayContent={
+      <p className="tilted-card-demo-text">
+        <p className="text-gray-800">{book.meta?.status || "N/A"}</p>
+      </p>
+    }
+  />
+) : (
+<div className="relative inline-block">
+  <p className="absolute top-0 left-0 text-black text-xs px-1 py-0.5 rounded">
+    {book.meta?.status || "N/A"}
+  </p>
+  <SingleImageDisplay
+    className="rounded-lg w-full max-w-[200px] sm:max-w-[300px] h-auto sm:h-full object-cover shadow-md"
+    pictureUrl={book.picture_url}
+  />
+</div>
+)}
+
           </div>
           {/* Average Rating and Genres for mobile view */}
           <div className="w-full sm:hidden">
