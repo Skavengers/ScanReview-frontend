@@ -1,11 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import news1 from "../../assets/news/news-1.png"
-import news2 from "../../assets/news/news-2.webp"
-import news3 from "../../assets/news/news-3.jpg"
-import news4 from "../../assets/news/news-4.webp"
-import news5 from "../../assets/news/news-5.webp"
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -23,31 +18,31 @@ const news = [
         "id": 1,
         "title": "Industry Concerns Over AI Policies",
         "description": "Manhwa creators and publishers are taking drastic measures to protect their works from AI due to new policies by X (formerly Twitter). These policies allow third-party collaborators to use data to train AI models, leading studios like D&C Media to alter their content to confuse AI algorithms while maintaining visual quality for human viewers.",
-        "image": news1
+        "image": "https://res.cloudinary.com/dzi37tegh/image/upload/v1755610173/news-1_lwwgzp.jpg"
     },
     {
         "id": 2,
         "title": "Anime Adaptations",
         "description": "Line Manga plans to launch 20 webtoon anime adaptations in 2025, building on the success of series like Solo Leveling and Tower of God. This reflects a growing trend in adapting manhwa into anime.",
-        "image": news2
+        "image": "https://res.cloudinary.com/dzi37tegh/image/upload/v1755610174/news-2_mcnkzc.webp"
     },
     {
         "id": 3,
         "title": "WEBTOON Shop Launch",
         "description": "WEBTOON Entertainment has introduced the WEBTOON Shop, offering merchandise for popular webtoons, enhancing fan engagement and accessibility.",
-        "image": news3
+        "image": "https://res.cloudinary.com/dzi37tegh/image/upload/v1755610175/news-3_tnekjy.jpg"
     },
     {
         "id": 4,
         "title": "Solo Leveling: Ragnarok Hiatus",
         "description": "The web novel Solo Leveling: Ragnarok is on a one-month hiatus. This follows the release of Chapter 36 and is due to the author's need for further medical treatment after a car accident. The hiatus has been extended until the end of January 2025.",
-        "image": news4
+        "image": "https://res.cloudinary.com/dzi37tegh/image/upload/v1755610176/news-4_m8knqg.webp"
     },
     {
         "id": 5,
         "title": "Roxana Creator Health and Future Plans",
         "description": "The creator of Roxana has faced significant personal and health issues, which have impacted the continuation of the series. They have expressed a commitment to return after addressing these health concerns, indicating that while the series is on a hiatus, it is not permanently discontinued.",
-        "image": news5
+        "image": "https://res.cloudinary.com/dzi37tegh/image/upload/v1755610178/news-5_koqbbh.webp"
     }
 ]
 
