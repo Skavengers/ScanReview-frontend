@@ -37,13 +37,20 @@ const SingleBook = () => {
   const [userNote, setUserNote] = useState('');
 
   // Effect to initialize the local state from the fetched data
-  useEffect(() => {
-    if (userInteraction) {
-      setUserRating(userInteraction.rating || 0);
-      setUserStatus(userInteraction.status || '');
-      setUserNote(userInteraction.note || '');
-    }
-  }, [userInteraction]);
+useEffect(() => {
+  if (userInteraction && userInteraction.length > 0) {
+    const interaction = userInteraction[0];  // get first interaction object
+    setUserRating(interaction.rating || 0);
+    setUserStatus(interaction.status || '');
+    setUserNote(interaction.note || '');
+  } else {
+    // reset states if no interaction found
+    setUserRating(0);
+    setUserStatus('');
+    setUserNote('');
+  }
+}, [userInteraction]);
+
 
   // Helper function for saving interactions
 const saveInteraction = async (interactionData) => {
