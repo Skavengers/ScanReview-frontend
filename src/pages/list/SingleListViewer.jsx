@@ -1,19 +1,42 @@
-import React from 'react';
-import { useFetchListByIdQuery } from '../../redux/features/lists/listApiSlice';
+import React, { useEffect } from 'react';
+import { 
+  useFetchListByIdQuery, 
+  useLikeListMutation, 
+  useViewListMutation 
+} from '../../redux/features/lists/listApiSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { IoMdCreate } from "react-icons/io";
 import { formatDistanceToNow } from 'date-fns';
+import { AiOutlineEye, AiOutlineLike } from "react-icons/ai";
 
 const SingleListViewer = () => {
   const { currentUser } = useAuth() || {};
   const { id } = useParams();
-  const { data: list, isLoading, isError } = useFetchListByIdQuery(id);
+  const { data: list, isLoading, isError, refetch } = useFetchListByIdQuery(id);
+  const [likeList] = useLikeListMutation();
+  const [viewList] = useViewListMutation();
   const navigate = useNavigate();
 
-  const handleModifyClick = () => {
-    navigate(`/lists/modify-list/${id}`);
+  useEffect(() => {
+    if (id) {
+      viewList(id).then(() => {
+        refetch();
+      });
+    }
+  }, [id, viewList, refetch]);
+
+  const handleLike = async () => {
+    await likeList(id);
+    refetch();
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error loading list details</div>;
+  if (!list) return <div className="text-center py-8">No list found.</div>;
+
+  const createdAgo = formatDistanceToNow(new Date(list.createdAt));
+  const updatedAgo = formatDistanceToNow(new Date(list.updatedAt));
 
   const getCategoryLabel = (category) => {
     switch (category) {
@@ -26,20 +49,16 @@ const SingleListViewer = () => {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error loading list details</div>;
-  if (!list) return <div className="text-center py-8">No list found.</div>;
-
-  const createdAgo = formatDistanceToNow(new Date(list.createdAt), { addSuffix: false });
-  const updatedAgo = formatDistanceToNow(new Date(list.updatedAt), { addSuffix: false });
+  // Check if current user already liked the list
+  const userHasLiked = currentUser && list.likedBy?.includes(currentUser.id);
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
-      <div className='flex justify-between items-center mb-4'>
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">{list.title}</h2>
         {currentUser?.displayName === list.createdBy && (
           <button
-            onClick={handleModifyClick}
+            onClick={() => navigate(`/lists/modify-list/${id}`)}
             className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
             <IoMdCreate className="mr-2" />
@@ -48,8 +67,31 @@ const SingleListViewer = () => {
         )}
       </div>
 
+      <div className="flex gap-6 mb-4 text-gray-700 text-sm">
+        <span className="flex items-center gap-1">
+          <AiOutlineEye className="text-lg" /> {list.views}
+        </span>
+
+        {currentUser ? (
+          <button
+            onClick={handleLike}
+            disabled={userHasLiked}
+            className={`flex items-center gap-1 ${userHasLiked ? 'text-gray-400 cursor-not-allowed' : 'hover:text-blue-600'}`}
+          >
+            <AiOutlineLike className="text-lg" />
+            {userHasLiked ? 'Liked' : list.likes}
+          </button>
+        ) : (
+          <span className="flex items-center gap-1 cursor-not-allowed opacity-60" title="Login to like">
+            <AiOutlineLike className="text-lg" /> {list.likes}
+          </span>
+        )}
+      </div>
+
       <div className="text-sm text-gray-500 mb-4">
-        {`List of ${list.items?.length || 0} ${getCategoryLabel(list.category)} created ${createdAgo} ago · modified ${updatedAgo} ago`}
+        {`List of ${list.items?.length || 0} ${getCategoryLabel(
+          list.category
+        )} · created ${createdAgo} ago · modified ${updatedAgo} ago`}
       </div>
 
       <p className="mb-4 text-gray-700">{list.description}</p>
@@ -81,7 +123,8 @@ const SingleListViewer = () => {
           <ul className="list-disc list-inside space-y-1">
             {list.items.map((item, idx) => (
               <li key={idx}>
-                <strong>{item.rank}.</strong> {item.id} {item.explanation && `– ${item.explanation}`}
+                <strong>{item.rank}.</strong> {item.id}{" "}
+                {item.explanation && `– ${item.explanation}`}
               </li>
             ))}
           </ul>

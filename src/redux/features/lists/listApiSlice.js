@@ -54,6 +54,21 @@ const listApi = createApi({
       }),
       invalidatesTags: ['Lists'],
     }),
+likeList: builder.mutation({
+  query: (id) => ({
+    url: `/${id}/like`,
+    method: 'POST',
+  }),
+  invalidatesTags: (result, error, id) => [{ type: 'Lists', id }],
+}),
+
+    viewList: builder.mutation({
+      query: (id) => ({
+        url: `/${id}/view`,
+        method: 'POST',
+      }),
+      invalidatesTags: (result, error, id) => [{ type: 'Lists', id }],
+    }),
   }),
 });
 
@@ -65,5 +80,7 @@ export const {
   useCreateListMutation,
   useUpdateListMutation,
   useDeleteListMutation,
+  useLikeListMutation,
+  useViewListMutation,
 } = listApi;
 export default listApi;

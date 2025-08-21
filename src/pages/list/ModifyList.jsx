@@ -116,7 +116,6 @@ const ModifyList = () => {
     updatedItems.splice(index, 1);
     setFormData(prev => ({ ...prev, items: updatedItems }));
   };
-
   if (isLoading || !formData) return <div>Loading list...</div>;
   if (error) return <div>{error?.data?.message || 'Failed to load list'}</div>;
 
