@@ -55,7 +55,7 @@ const SingleListViewer = () => {
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">{list.title}</h2>
+        <h2 className="text-2xl font-bold line-clamp-1">{list.title}</h2>
         {currentUser?.displayName === list.createdBy && (
           <button
             onClick={() => navigate(`/lists/modify-list/${id}`)}
@@ -82,7 +82,7 @@ const SingleListViewer = () => {
             {userHasLiked ? 'Liked' : list.likes}
           </button>
         ) : (
-          <span className="flex items-center gap-1 cursor-not-allowed opacity-60" title="Login to like">
+          <span className="flex items-center gap-1 cursor-not-allowed opacity-60 " title="Login to like">
             <AiOutlineLike className="text-lg" /> {list.likes}
           </span>
         )}
@@ -94,7 +94,7 @@ const SingleListViewer = () => {
         )} · created ${createdAgo} ago · modified ${updatedAgo} ago`}
       </div>
 
-      <p className="mb-4 text-gray-700">{list.description}</p>
+      <p className="mb-4 text-gray-700 break-words whitespace-normal">{list.description}</p>
 
       <div className="mb-4 text-sm text-gray-600">
         <span className="mr-4 capitalize">Type: {list.type}</span>
@@ -122,8 +122,8 @@ const SingleListViewer = () => {
         {list.items && list.items.length > 0 ? (
           <ul className="list-disc list-inside space-y-1">
             {list.items.map((item, idx) => (
-              <li key={idx}>
-                <strong>{item.rank}.</strong> {item.id}{" "}
+              <li key={idx} className='break-words bg-gray-100 rounded-2xl m-2 p-2'>
+                <strong className='bg-primary m-1 rounded-full p-2'>{item.rank}.</strong> {item.id}{" "}
                 {item.explanation && `– ${item.explanation}`}
               </li>
             ))}
