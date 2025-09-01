@@ -52,6 +52,18 @@ const userInteractionsApi = createApi({
           return response.data || { error: 'An unknown error occurred' };
         }
       },
+      fetchFavorites: builder.query({
+        query: (userId) => `/interactions/favorites?userId=${userId}`,
+        providesTags: ['UserInteractions'],
+      }),
+      toggleFavorite: builder.mutation({
+        query: ({ userId, bookId, favorite }) => ({
+          url: '/interactions/favorite',
+          method: 'POST',
+          body: { userId, bookId, favorite }
+        }),
+        invalidatesTags: ['UserInteractions'],
+      }),
     }),
   }),
 });
@@ -59,6 +71,8 @@ const userInteractionsApi = createApi({
 export const {
   useFetchUserInteractionsQuery,
   useSaveUserInteractionMutation,
+  useFetchFavoritesQuery,
+  useToggleFavoriteMutation,
 } = userInteractionsApi;
 
 export default userInteractionsApi;

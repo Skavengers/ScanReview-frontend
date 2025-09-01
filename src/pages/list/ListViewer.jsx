@@ -89,8 +89,8 @@ const ListViewer = () => {
         {lists.map(list => (
           <Link to={`/lists/${list._id}`} key={list._id}>
             <div className="shadow-md p-4 border rounded bg-white">
-              <h2 className="text-xl font-semibold mb-1">{list.title}</h2>
-              <p className="text-sm text-gray-600 mb-2">{list.description}</p>
+              <h2 className="text-xl font-semibold mb-1 line-clamp-1">{list.title}</h2>
+              <p className="text-sm text-gray-600 mb-2 line-clamp-1">  {list.description}</p>
               <div className="text-xs text-gray-500 mb-2">
                 <span className="mr-2 capitalize">Type: {list.type}</span>
                 <span className="mr-2 capitalize">Category: {list.category}</span>

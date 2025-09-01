@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import { useAuth } from '../../context/AuthContext';
 import SingleImageDisplay from '../../components/SingleImageDisplay';
@@ -7,131 +7,110 @@ import { useFetchUserInteractionsQuery, useSaveUserInteractionMutation } from '.
 import { FaStar } from 'react-icons/fa';
 import TiltedCard from '../../components/TiltedCard';
 
-
-  
 const SingleBook = () => {
   const { id } = useParams();
   const { currentUser } = useAuth();
 
-  // Fetch book and user interaction data
   const { data: book, isLoading: isBookLoading, isError: isBookError } = useFetchBookByIdQuery(id);
-  const {
-    data: userInteraction,
-    isLoading: isInteractionLoading,
-    isError: isInteractionError,
-    refetch
-  } = useFetchUserInteractionsQuery(
-    { userId: currentUser?.uid, bookId: id },
-    { skip: !currentUser }
-  );
+
+  // Fetch user interaction for this book and user as a single document
+  const { data: userInteraction = [], isLoading: isLoadingInteraction, isError: isErrorInteraction, refetch } = 
+    useFetchUserInteractionsQuery({ userId: currentUser?.uid, bookId: id }, { skip: !currentUser });
 
   const [saveUserInteraction, { isLoading: isSaving }] = useSaveUserInteractionMutation();
 
-  // Use a state for managing potential errors
-  const [error, setError] = useState('');
-  const [showFullSynopsis, setShowFullSynopsis] = useState(false);
-
-  // Local State for UI that will be persisted
+  // Local state for user interaction fields including favorite
   const [userRating, setUserRating] = useState(0);
   const [userStatus, setUserStatus] = useState('');
   const [userNote, setUserNote] = useState('');
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [error, setError] = useState('');
+  const [showFullSynopsis, setShowFullSynopsis] = useState(false);
 
-  // Effect to initialize the local state from the fetched data
-useEffect(() => {
-  if (userInteraction && userInteraction.length > 0) {
-    const interaction = userInteraction[0];  // get first interaction object
-    setUserRating(interaction.rating || 0);
-    setUserStatus(interaction.status || '');
-    setUserNote(interaction.note || '');
-  } else {
-    // reset states if no interaction found
-    setUserRating(0);
-    setUserStatus('');
-    setUserNote('');
-  }
-}, [userInteraction]);
+  // Synchronize local state from fetched user interaction
+  useEffect(() => {
+    if (userInteraction.length > 0) {
+      const interaction = userInteraction[0];
+      setUserRating(interaction.rating || 0);
+      setUserStatus(interaction.status || '');
+      setUserNote(interaction.note || '');
+      setIsFavorite(interaction.favorite || false);
+    } else {
+      setUserRating(0);
+      setUserStatus('');
+      setUserNote('');
+      setIsFavorite(false);
+    }
+  }, [userInteraction]);
 
-
-  // Helper function for saving interactions
-const saveInteraction = async (interactionData) => {
-  const previousState = {
-    rating: userRating,
-    status: userStatus,
-    note: userNote
-  };
-
-  // Optimistically update the local state
-  if (interactionData.rating !== undefined) setUserRating(interactionData.rating);
-  if (interactionData.status !== undefined) setUserStatus(interactionData.status);
-  if (interactionData.note !== undefined) setUserNote(interactionData.note);
-
-  // Add the missing required fields to the payload
-  const payload = {
-    ...interactionData,
-    userId: currentUser.uid,
-    bookId: id,
-  };
-
-  // Determine the interactionType based on which value is being updated
-  if (interactionData.rating !== undefined) {
-    payload.interactionType = 'rating';
-  } else if (interactionData.status !== undefined) {
-    payload.interactionType = 'status';
-  } else if (interactionData.note !== undefined) {
-    payload.interactionType = 'note';
-  }
-
-  try {
-    await saveUserInteraction(payload).unwrap();
-    setError('');
-    // Refetch the user interactions to ensure the UI is up-to-date
-    refetch();
-  } catch (err) {
-    console.error('Error saving interaction:', err);
-    setError('Failed to save interaction. Please try again.');
-    // Revert the local state if the API call fails
-    setUserRating(previousState.rating);
-    setUserStatus(previousState.status);
-    setUserNote(previousState.note);
-  }
-};
-
-  // Event Handlers
-  const handleStarClick = async (ratingValue) => {
+  // Unified save handler for interaction fields including favorite
+  const saveInteraction = async (fieldsToUpdate) => {
     if (!currentUser) {
-      setError('You need to be logged in to rate this book.');
+      setError('You need to be logged in to perform this action.');
       return;
     }
+
+    const previousState = {
+      rating: userRating,
+      status: userStatus,
+      note: userNote,
+      favorite: isFavorite
+    };
+
+    // Optimistic UI update
+    if (fieldsToUpdate.rating !== undefined) setUserRating(fieldsToUpdate.rating);
+    if (fieldsToUpdate.status !== undefined) setUserStatus(fieldsToUpdate.status);
+    if (fieldsToUpdate.note !== undefined) setUserNote(fieldsToUpdate.note);
+    if (fieldsToUpdate.favorite !== undefined) setIsFavorite(fieldsToUpdate.favorite);
+
+    // Prepare payload
+    const payload = {
+      ...fieldsToUpdate,
+      userId: currentUser.uid,
+      bookId: id,
+      interactionType: 'general' // You can keep interactionType generic or omit if your backend supports it
+    };
+
+    try {
+      await saveUserInteraction(payload).unwrap();
+      setError('');
+      refetch();
+    } catch (err) {
+      console.error('Error saving interaction:', err);
+      setError('Failed to save interaction. Please try again.');
+
+      // Rollback optimistic update
+      setUserRating(previousState.rating);
+      setUserStatus(previousState.status);
+      setUserNote(previousState.note);
+      setIsFavorite(previousState.favorite);
+    }
+  };
+
+  // Event handlers for each field call the unified saveInteraction method
+  const toggleFavoriteHandler = async () => {
+    await saveInteraction({ favorite: !isFavorite });
+  };
+
+  const handleStarClick = async (ratingValue) => {
     await saveInteraction({ rating: ratingValue });
   };
 
   const handleStatusToggle = async (status) => {
-    if (!currentUser) {
-      setError('You need to be logged in to change your reading status.');
-      return;
-    }
-    await saveInteraction({ status: status });
+    await saveInteraction({ status });
   };
 
-  const handleNoteChange = (event) => {
-    if (!currentUser) {
-      setError('You need to be logged in to add or modify notes.');
-      return;
-    }
-    setUserNote(event.target.value);
+  const handleNoteChange = (e) => {
+    setUserNote(e.target.value);
   };
 
   const saveNote = async () => {
-    if (!currentUser) {
-      setError('You need to be logged in to save notes.');
-      return;
-    }
     await saveInteraction({ note: userNote });
   };
 
-  if (isBookLoading || (currentUser && isInteractionLoading)) return <div>Loading...</div>;
-  if (isBookError) return <div>Error happened while loading book info</div>;
-  if (currentUser && isInteractionError) return <div>Error happened while loading user interactions</div>;
+  if (isBookLoading || (currentUser && isLoadingInteraction)) return <div>Loading...</div>;
+  if (isBookError) return <div>Error loading book info.</div>;
+  if (currentUser && isErrorInteraction) return <div>Error loading user interactions.</div>;
   if (!book) return <div>Book not found.</div>;
 
   const MAX_LENGTH = 500;
@@ -150,37 +129,37 @@ const saveInteraction = async (interactionData) => {
             <p className="mt-1 text-gray-600 text-sm">{book?.authors?.join(', ') || "Unknown"}</p>
           </div>
           <div className="p-2 w-full flex justify-center items-center h-full">
-{window.innerWidth >= 1024 ? (
-  <TiltedCard
-    imageSrc={book.picture_url}
-    altText={book.title}
-    captionText={book.title}
-    containerHeight="400px"
-    containerWidth="300px"
-    imageHeight="420px"
-    imageWidth="310px"
-    rotateAmplitude={12}
-    scaleOnHover={1.2}
-    showMobileWarning={false}
-    showTooltip={true}
-    displayOverlayContent={true}
-    overlayContent={
-      <p className="tilted-card-demo-text">
-        <p className="text-gray-800">{book.meta?.status || "N/A"}</p>
-      </p>
-    }
-  />
-) : (
-<div className="relative inline-block">
-  <p className="absolute top-0 left-0 text-black text-xs px-1 py-0.5 rounded">
-    {book.meta?.status || "N/A"}
-  </p>
-  <SingleImageDisplay
-    className="rounded-lg w-full max-w-[200px] sm:max-w-[300px] h-auto sm:h-full object-cover shadow-md"
-    pictureUrl={book.picture_url}
-  />
-</div>
-)}
+            {window.innerWidth >= 1024 ? (
+              <TiltedCard
+                imageSrc={book.picture_url}
+                altText={book.title}
+                captionText={book.title}
+                containerHeight="400px"
+                containerWidth="300px"
+                imageHeight="420px"
+                imageWidth="310px"
+                rotateAmplitude={12}
+                scaleOnHover={1.2}
+                showMobileWarning={false}
+                showTooltip={true}
+                displayOverlayContent={true}
+                overlayContent={
+                  <p className="tilted-card-demo-text">
+                    <p className="text-gray-800">{book.meta?.status || "N/A"}</p>
+                  </p>
+                }
+              />
+            ) : (
+            <div className="relative inline-block">
+              <p className="absolute top-0 left-0 text-black text-xs px-1 py-0.5 rounded">
+                {book.meta?.status || "N/A"}
+              </p>
+              <SingleImageDisplay
+                className="rounded-lg w-full max-w-[200px] sm:max-w-[300px] h-auto sm:h-full object-cover shadow-md"
+                pictureUrl={book.picture_url}
+              />
+            </div>
+            )}
 
           </div>
           {/* Average Rating and Genres for mobile view */}
@@ -285,6 +264,19 @@ const saveInteraction = async (interactionData) => {
           </div>
         )}
         <div>
+      <div className="flex items-center gap-2 mb-4">
+        <h1 className="text-lg font-bold">{book.title}</h1>
+        {/* Favorite toggle button */}
+        <button
+          onClick={toggleFavoriteHandler}
+          className={`p-2 rounded ${isFavorite ? 'bg-red-500 text-white' : 'bg-gray-300'}`}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          //disabled={fetchingFavorites || isToggling}
+        >
+          {isFavorite ? '♥' : '♡'}
+        </button>
+      </div>
+
           <h2 className="text-lg font-semibold text-gray-900">Your Reading Status</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {['reading', 'completed', 'on_hold', 'dropped', 'plan_to_read'].map((status) => (
