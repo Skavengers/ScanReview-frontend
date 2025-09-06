@@ -1,101 +1,79 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchBooksQuery } from '../redux/features/books/booksApi';
 import { useNavigate } from 'react-router-dom';
-import { FaBars } from 'react-icons/fa6';
-import { FaSearch } from "react-icons/fa";
+import { FaSearch } from 'react-icons/fa';
 
-const SearchBar = () => {
+const SearchBar = () => {/*
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const { data: books, error, isLoading } = useSearchBooksQuery(searchTerm);
+  const { data: books = [], error, isLoading } = useSearchBooksQuery(searchTerm, {
+    skip: searchTerm.trim() === '',
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (books && books.length > 0) {
-      // Get top 3 suggestions
-      const topSuggestions = books.slice(0, 3);
-      setSuggestions(topSuggestions);
+    if (books.length > 0) {
+      // Show only top 5 suggestions
+      setSuggestions(books.slice(0, 5));
     } else {
       setSuggestions([]);
     }
   }, [books]);
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
+  const onChange = (e) => {
+    setSearchTerm(e.target.value);
   };
-    
 
-  const handleKeyDown = (event) => {
-    if (event.key === 'Enter' && searchTerm.trim()) {
-      // Navigate to the book's page or search results page
-      navigate(`/books/${encodeURIComponent(searchTerm.toLowerCase().replace(/ /g, "_"))}`);
+  const onKeyDown = (e) => {
+    if (e.key === 'Enter' && searchTerm.trim() !== '') {
+      // Navigate to search results page with query param
+      navigate(`/books/search?query=${encodeURIComponent(searchTerm.trim())}`);
+      setSuggestions([]);
     }
   };
 
-  const handleSuggestionClick = (suggestion) => {
-    // Navigate to the book's page when a suggestion is clicked
-    navigate(`/books/${encodeURIComponent(suggestion.title)}`);
-  };
+  const handleSelectSuggestion = (book) => {
+    // Navigate to selected book detail page by id
+    navigate(`/books/${book._id}`);
+  };*/
 
   return (
-    <div className="relative w-full bg-[#EAEAEA] rounded-md flex items-center px-4 md:px-6 py-2 shadow-sm focus:outline-none">
-      
-      <FaSearch className='  mr-2 inline-block left-2 inset-y-2'/>
-      <input
-        type="text"
-        placeholder="Search..."
-        value={searchTerm}
-        onChange={handleSearch}
-        onKeyDown={handleKeyDown}
-        className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-500"
-      />
-      {isLoading && <p className="absolute top-full mt-2 text-sm text-gray-500">Loading...</p>}
-      {error && <p className="absolute top-full mt-2 text-sm text-red-500">Error occurred while fetching books</p>}
-      {suggestions.length > 0 && (
-        <ul className="absolute z-10 top-full mt-2 w-full bg-white border border-gray-200 rounded-md shadow-md max-h-60 overflow-auto">
-          {suggestions.map((book) => (
-            <li key={book._id} onClick={() => handleSuggestionClick(book)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-800">
-              {book.title}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <div>Searchbar</div>
+//    <div className="relative w-full max-w-md mx-auto">
+//      <div className="flex items-center bg-gray-100 rounded-md px-3 py-2 shadow">
+//        <FaSearch className="text-gray-500 mr-2" />
+//        <input
+//          type="search"
+//          placeholder="Search by title, alternate title, or author"
+//          value={searchTerm}
+//          onChange={onChange}
+//          onKeyDown={onKeyDown}
+//          className="flex-grow bg-transparent outline-none"
+//          aria-label="Search books"
+//          autoComplete="off"
+//        />
+//      </div>
+//      {isLoading && <p className="mt-1 text-sm text-gray-500">Loading...</p>}
+//      {error && <p className="mt-1 text-sm text-red-500">Error fetching search results</p>}
+//      {suggestions.length > 0 && (
+//        <ul className="absolute z-20 mt-1 w-full max-w-md bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
+//          {suggestions.map((book) => (
+//            <li
+//              key={book._id}
+//              onClick={() => handleSelectSuggestion(book)}
+//              className="px-4 py-2 cursor-pointer hover:bg-gray-200"
+//              tabIndex={0}
+//              onKeyDown={(e) => { if (e.key === 'Enter') handleSelectSuggestion(book); }}
+//              role="button"
+//              aria-label={`Select ${book.title}`}
+//            >
+//              {book.title}
+//            </li>
+//          ))}
+//        </ul>
+//      )}
+//    </div>
   );
 };
 
 export default SearchBar;
-/*
-    <div className="relative w-full bg-[#EAEAEA] rounded-md flex items-center px-6 md:px-8 py-2 shadow-sm focus:outline-none">
-      <FaSearch className="text-gray-500 mr-3 text-lg" />
-      <input
-        type="text"
-        placeholder="Search by title, alternate title, or author"
-        value={searchTerm}
-        onChange={handleSearch}
-        onKeyDown={handleKeyDown}
-        className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-500"
-      />
-      {isLoading && <p className="absolute top-full mt-2 text-sm text-gray-500">Loading...</p>}
-      {error && <p className="absolute top-full mt-2 text-sm text-red-500">Error occurred while fetching books</p>}
-      {suggestions.length > 0 && (
-        <ul className="absolute z-10 top-full mt-2 w-full bg-white border border-gray-200 rounded-md shadow-md max-h-60 overflow-auto">
-          {suggestions.map((book) => (
-            <li
-              key={book._id}
-              onClick={() => handleSuggestionClick(book)}
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-800"
-            >
-              {book.title}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-
-
-
-
-
-
-*/

@@ -12,21 +12,20 @@ const SingleBook = () => {
   const { currentUser } = useAuth();
 
   const { data: book, isLoading: isBookLoading, isError: isBookError } = useFetchBookByIdQuery(id);
-
   // Fetch user interaction for this book and user as a single document
-  const { data: userInteraction = [], isLoading: isLoadingInteraction, isError: isErrorInteraction, refetch } = 
+  const { data: userInteraction = [], isLoading: isLoadingInteraction, isError: isErrorInteraction, refetch } =
     useFetchUserInteractionsQuery({ userId: currentUser?.uid, bookId: id }, { skip: !currentUser });
 
   const [saveUserInteraction, { isLoading: isSaving }] = useSaveUserInteractionMutation();
 
-  // Local state for user interaction fields including favorite
+  // Local state for user interaction fields
   const [userRating, setUserRating] = useState(0);
   const [userStatus, setUserStatus] = useState('');
   const [userNote, setUserNote] = useState('');
   const [isFavorite, setIsFavorite] = useState(false);
   const [error, setError] = useState('');
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
-
+  console.log(isFavorite);
   // Synchronize local state from fetched user interaction
   useEffect(() => {
     if (userInteraction.length > 0) {
@@ -49,12 +48,11 @@ const SingleBook = () => {
       setError('You need to be logged in to perform this action.');
       return;
     }
-
     const previousState = {
       rating: userRating,
       status: userStatus,
       note: userNote,
-      favorite: isFavorite
+      favorite: isFavorite,
     };
 
     // Optimistic UI update
@@ -68,7 +66,7 @@ const SingleBook = () => {
       ...fieldsToUpdate,
       userId: currentUser.uid,
       bookId: id,
-      interactionType: 'general' // You can keep interactionType generic or omit if your backend supports it
+      interactionType: 'general'
     };
 
     try {
@@ -76,10 +74,7 @@ const SingleBook = () => {
       setError('');
       refetch();
     } catch (err) {
-      console.error('Error saving interaction:', err);
       setError('Failed to save interaction. Please try again.');
-
-      // Rollback optimistic update
       setUserRating(previousState.rating);
       setUserStatus(previousState.status);
       setUserNote(previousState.note);
@@ -88,10 +83,6 @@ const SingleBook = () => {
   };
 
   // Event handlers for each field call the unified saveInteraction method
-  const toggleFavoriteHandler = async () => {
-    await saveInteraction({ favorite: !isFavorite });
-  };
-
   const handleStarClick = async (ratingValue) => {
     await saveInteraction({ rating: ratingValue });
   };
@@ -106,6 +97,10 @@ const SingleBook = () => {
 
   const saveNote = async () => {
     await saveInteraction({ note: userNote });
+  };
+
+  const toggleFavoriteHandler = async () => {
+    await saveInteraction({ favorite: !isFavorite });
   };
 
   if (isBookLoading || (currentUser && isLoadingInteraction)) return <div>Loading...</div>;
@@ -145,22 +140,21 @@ const SingleBook = () => {
                 displayOverlayContent={true}
                 overlayContent={
                   <p className="tilted-card-demo-text">
-                    <p className="text-gray-800">{book.meta?.status || "N/A"}</p>
+                    <span className="text-gray-800">{book.meta?.status || "N/A"}</span>
                   </p>
                 }
               />
             ) : (
-            <div className="relative inline-block">
-              <p className="absolute top-0 left-0 text-black text-xs px-1 py-0.5 rounded">
-                {book.meta?.status || "N/A"}
-              </p>
-              <SingleImageDisplay
-                className="rounded-lg w-full max-w-[200px] sm:max-w-[300px] h-auto sm:h-full object-cover shadow-md"
-                pictureUrl={book.picture_url}
-              />
-            </div>
+              <div className="relative inline-block">
+                <p className="absolute top-0 left-0 text-black text-xs px-1 py-0.5 rounded">
+                  {book.meta?.status || "N/A"}
+                </p>
+                <SingleImageDisplay
+                  className="rounded-lg w-full max-w-[200px] sm:max-w-[300px] h-auto sm:h-full object-cover shadow-md"
+                  pictureUrl={book.picture_url}
+                />
+              </div>
             )}
-
           </div>
           {/* Average Rating and Genres for mobile view */}
           <div className="w-full sm:hidden">
@@ -247,6 +241,19 @@ const SingleBook = () => {
         )}
         {currentUser && (
           <div>
+            <h2 className="text-lg font-semibold text-gray-900">Favorite</h2>
+            <button
+              onClick={toggleFavoriteHandler}
+              className={`px-3 py-1 rounded-lg text-xs transition-all ${isFavorite ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+              aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+              disabled={isSaving}
+            >
+              {isFavorite ? '♥ Remove from Favorites' : '♡ Add to Favorites'}
+            </button>
+          </div>
+        )}
+        {currentUser && (
+          <div>
             <h2 className="text-lg font-semibold text-gray-900">Your Notes</h2>
             <textarea
               className="mt-2 w-full p-2 border rounded text-xs"
@@ -264,19 +271,9 @@ const SingleBook = () => {
           </div>
         )}
         <div>
-      <div className="flex items-center gap-2 mb-4">
-        <h1 className="text-lg font-bold">{book.title}</h1>
-        {/* Favorite toggle button */}
-        <button
-          onClick={toggleFavoriteHandler}
-          className={`p-2 rounded ${isFavorite ? 'bg-red-500 text-white' : 'bg-gray-300'}`}
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          //disabled={fetchingFavorites || isToggling}
-        >
-          {isFavorite ? '♥' : '♡'}
-        </button>
-      </div>
-
+          <div className="flex items-center gap-2 mb-4">
+            <h1 className="text-lg font-bold">{book.title}</h1>
+          </div>
           <h2 className="text-lg font-semibold text-gray-900">Your Reading Status</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {['reading', 'completed', 'on_hold', 'dropped', 'plan_to_read'].map((status) => (
