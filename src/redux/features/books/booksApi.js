@@ -73,6 +73,9 @@ const booksApi = createApi({
       }),
       invalidatesTags: ['Books'],
     }),
+    getSingleBookById: builder.query({
+      query: (id) => `books/${id}`,
+    }),
   }),
 });
 
@@ -84,6 +87,7 @@ export const {
   useAddBookMutation,
   useUpdateBookMutation,
   useDeleteBookMutation,
+  useGetSingleBookByTitleQuery,
 } = booksApi;
 
 export default booksApi;
