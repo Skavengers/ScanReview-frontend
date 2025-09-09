@@ -40,13 +40,13 @@ const booksApi = createApi({
       },
       providesTags: ['Books'],
     }),
-    searchBooks: builder.query({
-      query: (searchTerm) => ({
-        url: '/search',
-        params: { searchTerm },
+      searchBooks: builder.query({
+        query: (searchTerm) => ({
+          url: '/search',
+          params: { searchTerm },
+        }),
+        providesTags: ['Books'],
       }),
-      providesTags: ['Books'],
-    }),
     addBook: builder.mutation({
       query: (newBook) => ({
         url: '/create-book',

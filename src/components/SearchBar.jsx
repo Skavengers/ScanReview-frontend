@@ -9,30 +9,28 @@ const SearchBar = () => {
   const navigate = useNavigate();
 
   // Trigger the books query only if non-empty input
-  // Assume your API defaults to returning up to 20 results
   const { data: books = [], error, isLoading } = useSearchBooksQuery(searchTerm, {
     skip: searchTerm.trim() === '',
   });
-  console.log(books)
-useEffect(() => {
-  if (!books) {
-    setSuggestions([]);
-    return;
-  }
 
-  const topBooks = books.slice(0, 3);
+  console.log(books);
 
-  // Avoid unnecessary state updates
-  setSuggestions((prev) => {
-    const same =
-      prev.length === topBooks.length &&
-      prev.every((p, i) => p._id === topBooks[i]._id);
+  useEffect(() => {
+    if (!books) {
+      setSuggestions([]);
+      return;
+    }
 
-    return same ? prev : topBooks;
-  });
-}, [books]);
+    const topBooks = books.slice(0, 3);
 
+    setSuggestions((prev) => {
+      const same =
+        prev.length === topBooks.length &&
+        prev.every((p, i) => p._id === topBooks[i]._id);
 
+      return same ? prev : topBooks;
+    });
+  }, [books]);
 
   const onChange = (e) => {
     setSearchTerm(e.target.value);
@@ -40,15 +38,14 @@ useEffect(() => {
 
   const onKeyDown = (e) => {
     if (e.key === 'Enter' && searchTerm.trim() !== '') {
-      // Navigate to search page with query and pageSize=20
       navigate(`/books/search?query=${encodeURIComponent(searchTerm.trim())}&pageSize=20`);
       setSuggestions([]); // Clear suggestions on search
     }
   };
 
   const handleSelectSuggestion = (book) => {
-    console.log(book)
-    navigate(`/books/${book}`);
+    console.log(book);
+    navigate(`/books/${book._id}`);
   };
 
   return (
@@ -80,7 +77,7 @@ useEffect(() => {
               role="button"
               aria-label={`Select ${book.title}`}
             >
-              {book}
+              {book.title}
             </li>
           ))}
         </ul>
