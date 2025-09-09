@@ -9,6 +9,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard" },
   { name: "Tier List", href: "/lists" },
   { name: "Random Manhwa", href: "/books/revenge_of_the_iron-blooded_sword_hound" },
+  { name: "Favorite", href: "/" },
   { name: "Top 100 manhwa of the Community ", href: "/" },
 ];
 
