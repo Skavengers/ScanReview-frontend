@@ -19,19 +19,13 @@ const userInteractionsApi = createApi({
   tagTypes: ['UserInteractions'],
   endpoints: (builder) => ({
     fetchUserInteractions: builder.query({
-      query: ({ userId, bookId }) => ({
-        url: `/interactions?userId=${userId}&bookId=${bookId}`,
-        method: 'GET',
-      }),
-      transformErrorResponse: (response) => {
-        console.error('Error response:', response);
-        if (response.status === 404) {
-          return { error: 'User interactions not found' };
-        } else if (response.status === 401) {
-          return { error: 'Unauthorized access' };
-        } else {
-          return response.data || { error: 'An unknown error occurred' };
-        }
+      query: ({ userId, bookId, status, favorite, minRating }) => {
+        let url = `/interactions?userId=${userId}`;
+        if (bookId) url += `&bookId=${bookId}`;
+        if (status) url += `&status=${status}`;
+        if (favorite !== undefined) url += `&favorite=${favorite}`;
+        if (minRating) url += `&minRating=${minRating}`;
+        return { url, method: 'GET' };
       },
       providesTags: ['UserInteractions'],
     }),

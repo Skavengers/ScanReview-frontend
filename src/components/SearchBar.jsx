@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 const BookCard = ({ book}) => {
 
   return (
-    <div className="flex  h-full flex-col overflow-hidden bg-white shadow-xl">
+    <div className="flex w-full flex-col overflow-hidden bg-white shadow-xl">
       <div className="flex-1 overflow-y-auto px-1 py-1 sm:px-6">
 
         <div className="">
@@ -132,7 +132,7 @@ const SearchBar = () => {
             value={searchTerm}
             onChange={onChange}
             onKeyDown={onKeyDown}
-            className="flex-grow bg-transparent outline-none"
+            className="flex-grow bg-transparent outline-none px-15"
             aria-label="Search books"
             autoComplete="off"
           />
@@ -154,7 +154,7 @@ const SearchBar = () => {
     <li
       key={book._id}
       onClick={() => handleSelectSuggestion(book)}
-      className="px-4 py-3 cursor-pointer hover:bg-gray-200"
+      className="px-15 py-3 cursor-pointer hover:bg-gray-200"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter') handleSelectSuggestion(book);
