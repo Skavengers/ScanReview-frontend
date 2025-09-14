@@ -2,13 +2,23 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FaFire, FaPlus } from "react-icons/fa";
+import { FaRegHeart } from "react-icons/fa";
 import SingleImageDisplay from '../../components/SingleImageDisplay';
+import { useFetchUserInteractionsQuery } from '../../redux/features/userInteractions/userInteractionsApi';
+import { useAuth } from '../../context/AuthContext';
+
 //import { fetchBookActivities } from '../../redux/features/books/booksActivitySlice';
 // used in the menu
-const BookCard = ({ book, isTierList = true }) => {
-  const dispatch = useDispatch();
+const BookCard = ({ book, isTierList = true, haveDescription= true}) => {
+  const { currentUser } = useAuth();
+  const userId = currentUser.uid;
+  const { data: interactions = [], isLoading, isError } = useFetchUserInteractionsQuery({ userId, bookId: book._id });
 
+  const interaction = interactions[0] || {};
 
+  const isFavorite = interaction.favorite === true;
+  const isRated = interaction.rating > 0;
+  console.log(interactions)
   return (
     <div className="flex mt-10 h-full flex-col overflow-hidden bg-white shadow-xl">
       <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
@@ -18,19 +28,25 @@ const BookCard = ({ book, isTierList = true }) => {
           <div className="flow-root">
             <ul role="list" className="-my-4 divide-y divide-gray-200">
               <li className="flex ">
-                <div className="ml-3 flex h-7 items-center">
-                  <button 
-                    type="button"
-                    className="relative -top-2 left-4 -m-2 py-1 px-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all duration-400"
-                  >
-                    <span>
-                      <FaFire />
-                    </span>
-                  </button>
-                </div>
+                {isRated &&
+                  <div className="ml-3 flex h-7 items-center">
+                    <button 
+                      type="button"
+                      className="relative -top-2 left-4 -m-2 py-1 px-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all duration-400"
+                    >
+                       <p className="text-white text-[15px] px-1"> {interaction.rating}</p>
+                    </button>
+                  </div>
+                }
 
                 <div className="h-28 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                   <SingleImageDisplay pictureUrl={book.picture_url} className="h-full w-full object-cover object-center" />
+                  {(isFavorite || isRated) && (
+                    <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-white rounded-full flex items-center justify-center shadow-md" style={{ width: 22, height: 22 }}>
+                      
+                      {isRated && <p className="text-white text-[13px]"> {interaction.rating}</p>  }
+                    </div>
+                  )}
                 </div>
 
                 <div className="ml-4 flex flex-1 flex-col">
@@ -81,8 +97,9 @@ const BookCard = ({ book, isTierList = true }) => {
           </div>
         </div>
       </div>
-
-      <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
+      {
+        haveDescription ? 
+      <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
         <div className="flex justify-between text-base font-medium text-gray-900">
           <p>Descriptions</p>
         </div>
@@ -90,6 +107,9 @@ const BookCard = ({ book, isTierList = true }) => {
           {book.description.length > 200 ? `${book?.description.slice(0, 200)}...` : book.description}
         </p>
       </div>
+      : ""
+      }
+
     </div>
   );
 };
