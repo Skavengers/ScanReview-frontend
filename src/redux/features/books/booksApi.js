@@ -33,6 +33,13 @@ const booksApi = createApi({
       query: (id) => `/${id}`,
       providesTags: (result, error, id) => [{ type: 'Books', id }],
     }),
+    fetchBooksByIds: builder.query({
+      query: (ids) => ({
+        url: `/byIds?ids=${ids.join(',')}`,
+        method: 'GET',
+      }),
+      providesTags: ['Books'],
+    }),
     fetchBookByPictureUrl: builder.query({
       query: (pictureUrl) => {
         const encodedUrl = encodeURIComponent(pictureUrl);
@@ -81,6 +88,7 @@ const booksApi = createApi({
 
 export const {
   useFetchAllBooksQuery,
+  useFetchBooksByIdsQuery,
   useFetchBookByIdQuery,
   useFetchBookByPictureUrlQuery,
   useSearchBooksQuery,

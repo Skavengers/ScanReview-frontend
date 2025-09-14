@@ -25,7 +25,7 @@ const SingleBook = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [error, setError] = useState('');
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
-  console.log(isFavorite);
+  const [hoveredRating, setHoveredRating] = useState(null);
   // Synchronize local state from fetched user interaction
   useEffect(() => {
     if (userInteraction.length > 0) {
@@ -226,14 +226,22 @@ const SingleBook = () => {
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Your Rating</h2>
             <div className="flex mt-2">
-              {[...Array(5)].map((_, index) => {
+              {[...Array(10)].map((_, index) => {
                 const starValue = index + 1;
                 return (
-                  <FaStar
-                    key={starValue}
-                    className={`cursor-pointer ${userRating >= starValue ? 'text-yellow-500' : 'text-gray-300'}`}
-                    onClick={() => handleStarClick(starValue)}
-                  />
+                  <div key={starValue} className="relative">
+                    <FaStar
+                      className={`cursor-pointer ${userRating >= starValue ? 'text-yellow-500' : 'text-gray-300'}`}
+                      onClick={() => handleStarClick(starValue)}
+                      onMouseEnter={() => setHoveredRating(starValue)}
+                      onMouseLeave={() => setHoveredRating(null)}
+                    />
+                    {hoveredRating === starValue && (
+                      <span className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs bg-gray-800 text-white px-1 py-0.5 rounded shadow z-10">
+                        {starValue}
+                      </span>
+                    )}
+                  </div>
                 );
               })}
             </div>

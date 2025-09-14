@@ -41,12 +41,12 @@ const BookCard = ({ book, isTierList = true, haveDescription= true}) => {
 
                 <div className="h-28 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">
                   <SingleImageDisplay pictureUrl={book.picture_url} className="h-full w-full object-cover object-center" />
-                  {(isFavorite || isRated) && (
+                  {/*!haveDescription && (
                     <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 bg-white rounded-full flex items-center justify-center shadow-md" style={{ width: 22, height: 22 }}>
                       
-                      {isRated && <p className="text-white text-[13px]"> {interaction.rating}</p>  }
+                      <p className="text-black text-[13px]"> + </p>  
                     </div>
-                  )}
+                  )*/}
                 </div>
 
                 <div className="ml-4 flex flex-1 flex-col">

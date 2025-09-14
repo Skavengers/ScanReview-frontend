@@ -5,10 +5,10 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { useFetchUserInteractionsQuery } from '../../redux/features/userInteractions/userInteractionsApi';
-import { useFetchBookByIdQuery } from '../../redux/features/books/booksApi';
+import { useFetchBooksByIdsQuery } from '../../redux/features/books/booksApi';
 import BookCard from '../books/BookCard';
 import { useAuth } from '../../context/AuthContext';
-
+import { skipToken } from '@reduxjs/toolkit/query';
 const filterOptions = [
   { label: "All", value: "all" },
   { label: "Rated", value: "rated" },
@@ -35,14 +35,15 @@ const InteractedBooksSection = () => {
   const VISIBLE_COUNT = 10;
   const effectiveInteractions = showAll ? filteredInteractions : filteredInteractions.slice(0, VISIBLE_COUNT);
   const bookIds = effectiveInteractions.map(i => i.bookId).filter(Boolean);
-
+  const { data: booksToShow = [], isLoading: booksLoading } = useFetchBooksByIdsQuery(bookIds.length ? bookIds : skipToken);
   // Use useFetchBookByIdQuery for each bookId
   // Each call returns its own {data, isLoading, isError}
-  const bookResults = bookIds.map(id => useFetchBookByIdQuery(id));
+  console.log(bookIds)
+  console.log(booksToShow)
+  const bookResults = booksToShow;
 
   const anyLoading = isLoading || bookResults.some(r => r.isLoading);
   const anyError = isError || bookResults.some(r => r.isError);
-  const booksToShow = bookResults.map(r => r.data).filter(Boolean);
 
   if (anyLoading) return <div>Loading...</div>;
   if (anyError) return <div>Error loading your books.</div>;
