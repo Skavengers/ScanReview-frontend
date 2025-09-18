@@ -1,25 +1,27 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useFetchBookByIdQuery } from '../../redux/features/books/booksApi';
 import {
   useFetchListByIdQuery,
   useUpdateListMutation,
   useDeleteListMutation,
 } from '../../redux/features/lists/listApiSlice';
-import axiosInstance from '../../utils/axiosInstance';
+import { useFetchBooksByIdsQuery } from '../../redux/features/books/booksApi';
+import { skipToken } from '@reduxjs/toolkit/query';
+import ItemSearchBar from './ItemSearchBar';
+import BookCard from '../books/BookCard';
 
 const ModifyList = () => {
   const { currentUser } = useAuth();
-  const idUser = currentUser.displayName;
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Fetch list data
   const { data, isLoading, error } = useFetchListByIdQuery(id);
   const [updateList, { isLoading: isUpdating }] = useUpdateListMutation();
   const [deleteList, { isLoading: isDeleting }] = useDeleteListMutation();
 
+  // Form state
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -30,9 +32,13 @@ const ModifyList = () => {
     isPublic: true,
   });
 
+  // Tag input state
   const [tagInput, setTagInput] = useState('');
+
+  // New item being added
   const [newItem, setNewItem] = useState({ id: '', rank: 1, explanation: '' });
 
+  // Populate formData when data loads
   useEffect(() => {
     if (data && formData.title === '') {
       setFormData({
@@ -44,38 +50,28 @@ const ModifyList = () => {
         items: data.items || [],
         isPublic: data.isPublic ?? true,
       });
-
       const maxRank = Math.max(0, ...data.items.map(item => item.rank || 0));
       setNewItem({ id: '', rank: maxRank + 1, explanation: '' });
     }
   }, [data, formData.title]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const payload = { ...formData };
-      await updateList({ id , ...payload }).unwrap();
-      alert('List updated successfully!');
-    } catch (err) {
-      console.error(err);
-      alert('Failed to update list');
-    }
-  };
+  // Fetch full book details for all items
+  const bookIds = formData.items.map(item => item.id).filter(Boolean);
+  const {
+    data: books = [],
+    isLoading: booksLoading,
+  } = useFetchBooksByIdsQuery(bookIds.length ? bookIds : skipToken);
 
-  const handleDelete = async () => {
-    const confirmed = window.confirm('Are you sure you want to delete this list?');
-    if (!confirmed) return;
-  
-    try {
-      await deleteList(id).unwrap();
-      alert('List deleted successfully');
-      navigate(`/lists/`);
-    } catch (err) {
-      console.error(err);
-      alert('Failed to delete list');
-    }
-  };
+  // Create lookup map of bookId => book object
+  const bookMap = useMemo(() => {
+    const map = {};
+    books.forEach(book => {
+      map[book._id] = book;
+    });
+    return map;
+  }, [books]);
 
+  // Form field change handler
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -84,6 +80,7 @@ const ModifyList = () => {
     }));
   };
 
+  // Add a new tag
   const handleAddTag = () => {
     const tag = tagInput.trim();
     if (tag && !formData.tags.includes(tag)) {
@@ -92,6 +89,7 @@ const ModifyList = () => {
     }
   };
 
+  // Remove a tag
   const handleRemoveTag = (tag) => {
     setFormData(prev => ({
       ...prev,
@@ -99,7 +97,7 @@ const ModifyList = () => {
     }));
   };
 
-
+  // Add new item to list
   const handleAddItem = () => {
     if (newItem.id) {
       setFormData(prev => ({
@@ -110,17 +108,45 @@ const ModifyList = () => {
     }
   };
 
-
+  // Remove item from list
   const handleRemoveItem = (index) => {
     const updatedItems = [...formData.items];
     updatedItems.splice(index, 1);
     setFormData(prev => ({ ...prev, items: updatedItems }));
   };
-  if (isLoading || !formData) return <div>Loading list...</div>;
+
+  // Submit updated list
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = { ...formData };
+      await updateList({ id, ...payload }).unwrap();
+      alert('List updated successfully!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to update list');
+    }
+  };
+
+  // Delete list
+  const handleDelete = async () => {
+    const confirmed = window.confirm('Are you sure you want to delete this list?');
+    if (!confirmed) return;
+    try {
+      await deleteList(id).unwrap();
+      alert('List deleted successfully');
+      navigate('/lists/');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete list');
+    }
+  };
+
+  if (isLoading || booksLoading || !formData) return <div>Loading list...</div>;
   if (error) return <div>{error?.data?.message || 'Failed to load list'}</div>;
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-xl mx-auto p-3 bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-bold mb-4 text-center text-green-600">Modify your List</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -215,21 +241,41 @@ const ModifyList = () => {
 
         <div>
           <label className="font-semibold">Items</label>
-          {formData.items.map((item, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <span>{item.rank}.</span>
-              <span>{item.id}</span>
-              <span className="italic text-sm">{item.explanation}</span>
-              <button type="button" onClick={() => handleRemoveItem(index)} className="text-red-500">Remove</button>
-            </div>
-          ))}
+          {formData.items.map((item, index) => {
+            const book = bookMap[item.id];
+            return (
+              <div key={index} className="flex items-center gap-2">
+                <span>{item.rank}.</span>
+                {book ? (
+                  <BookCard book={book} haveDescription={false} />
+                ) : (
+                  <div className="italic text-gray-500">Loading book info...</div>
+                )}
+                <div className="italic text-sm">{item.explanation}</div>
+                <button type="button" onClick={() => handleRemoveItem(index)} className="text-red-500">
+                  Remove
+                </button>
+              </div>
+            );
+          })}
           <div className="flex flex-col gap-2 mt-2">
-            <input
-              placeholder="Item ID"
-              value={newItem.id}
-              onChange={(e) => setNewItem({ ...newItem, id: e.target.value })}
-              className="p-2 border rounded"
-            />
+            {formData.category === 'webtoon' ? (
+              <ItemSearchBar
+                category="webtoon"
+                onSelect={(item) => setNewItem({
+                  ...newItem,
+                  id: item._id,
+                  explanation: '', // reset explanation
+                })}
+              />
+            ) : (
+              <input
+                placeholder="Enter character ID"
+                value={newItem.id}
+                onChange={(e) => setNewItem({ ...newItem, id: e.target.value })}
+                className="p-2 border rounded"
+              />
+            )}
             <input
               placeholder="Explanation (optional)"
               value={newItem.explanation}

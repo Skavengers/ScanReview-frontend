@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaFire, FaPlus } from "react-icons/fa";
-import { FaRegHeart } from "react-icons/fa";
 import SingleImageDisplay from '../../components/SingleImageDisplay';
 import { useFetchUserInteractionsQuery } from '../../redux/features/userInteractions/userInteractionsApi';
 import { useAuth } from '../../context/AuthContext';
@@ -12,7 +11,7 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
   if (!currentUser) {
     // Not connected: render only non-user-dependent fields
     return (
-      <div className="flex mt-10 h-full flex-col overflow-hidden bg-white shadow-xl">
+      <div className=" mt-10 h-full flex-col hidden bg-white shadow-xl ">
         <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
           <div className="mt-4">
             <div className="flow-root">
@@ -27,20 +26,7 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
                         <h3>
                           <Link to={`/books/${book._id}`}>{book.title}</Link>
                         </h3>
-                        {isTierList
-                          ? <div className="ml-3 flex h-7 items-center gap-1">
-                              <button
-                                type="button"
-                                className="relative -top-2 left-1 -m-2 py-1.5 px-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-400"
-                                disabled
-                              >
-                                <span>
-                                  <FaPlus />
-                                </span>
-                              </button>
-                            </div>
-                          : <p className="absolute top-15 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
-                        }
+                        <p className="absolute top-15 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
                       </div>
                       <p className="mt-1 text-sm text-gray-500 capitalize">
                         <strong>Category:</strong>
@@ -57,9 +43,9 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
                         <strong>Origin:</strong> {book?.origin_country}
                       </p>
                       <div className="flex">
-                        <button type="button" className="font-medium text-indigo-600 hover:text-indigo-500" disabled>
+                        {/*<button type="button" className="font-medium text-indigo-600 hover:text-indigo-500" disabled>
                           {book.stats.average_rating == 0 ? 'not rated' : book.stats.average_rating}
-                        </button>
+                        </button>*/}
                       </div>
                     </div>
                   </div>
@@ -116,20 +102,7 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
                       <h3>
                         <Link to={`/books/${book._id}`}>{book.title}</Link>
                       </h3>
-                      {isTierList ? (
-                        <div className="ml-3 flex h-7 items-center gap-1">
-                          <button
-                            type="button"
-                            className="relative -top-2 left-1 -m-2 py-1.5 px-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-all duration-400"
-                          >
-                            <span>
-                              <FaPlus />
-                            </span>
-                          </button>
-                        </div>
-                      ) : (
                         <p className="absolute top-15 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
-                      )}
                     </div>
                     <p className="mt-1 text-sm text-gray-500 capitalize">
                       <strong>Category:</strong>
@@ -147,7 +120,7 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
                     </p>
                     <div className="flex">
                       <button type="button" className="font-medium text-indigo-600 hover:text-indigo-500">
-                        {book.stats.average_rating == 0 ? 'not rated' : book.stats.average_rating}
+                        {/*book.stats.average_rating == 0 ? 'not rated' : book.stats.average_rating*/}
                       </button>
                     </div>
                   </div>
