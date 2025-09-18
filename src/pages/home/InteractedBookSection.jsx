@@ -64,7 +64,7 @@ const InteractedBooksSection = () => {
           </button>
         ))}
       </div>
-      {booksToShow.length === 0 ? (
+      {filteredInteractions.length === 0 ? (
         <div>No books found for this filter.</div>
       ) : (
         <>
@@ -99,6 +99,7 @@ const InteractedBooksSection = () => {
           )}
         </>
       )}
+
     </div>
   );
 };
