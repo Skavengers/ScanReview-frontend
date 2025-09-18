@@ -40,20 +40,28 @@ const ModifyList = () => {
 
   // Populate formData when data loads
   useEffect(() => {
-    if (data && formData.title === '') {
-      setFormData({
-        title: data.title || '',
-        description: data.description || '',
-        type: data.type || 'ranked',
-        category: data.category || 'webtoon',
-        tags: data.tags || [],
-        items: data.items || [],
-        isPublic: data.isPublic ?? true,
+    if (data) {
+      setFormData(prevFormData => {
+        if (prevFormData.title !== '') {
+          // Already initialized, do not update again
+          return prevFormData;
+        }
+        return {
+          title: data.title || '',
+          description: data.description || '',
+          type: data.type || 'ranked',
+          category: data.category || 'webtoon',
+          tags: data.tags || [],
+          items: data.items || [],
+          isPublic: data.isPublic ?? true,
+        };
       });
+    
       const maxRank = Math.max(0, ...data.items.map(item => item.rank || 0));
       setNewItem({ id: '', rank: maxRank + 1, explanation: '' });
     }
-  }, [data, formData.title]);
+  }, [data]);
+
 
   // Fetch full book details for all items
   const bookIds = formData.items.map(item => item.id).filter(Boolean);

@@ -11,7 +11,7 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
   if (!currentUser) {
     // Not connected: render only non-user-dependent fields
     return (
-      <div className=" mt-10 h-full flex-col hidden bg-white shadow-xl ">
+      <div className=" mt-10 h-full flex-col hidden bg-white  ">
         <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
           <div className="mt-4">
             <div className="flow-root">
@@ -26,7 +26,7 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
                         <h3>
                           <Link to={`/books/${book._id}`}>{book.title}</Link>
                         </h3>
-                        <p className="absolute top-15 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
+                        <p className=" top-15 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
                       </div>
                       <p className="mt-1 text-sm text-gray-500 capitalize">
                         <strong>Category:</strong>
@@ -77,7 +77,7 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
   const isRated = interaction.rating > 0;
 
   return (
-    <div className="flex mt-5 h-full flex-col overflow-hidden bg-white shadow-xl">
+    <div className="flex mt-5 h-full flex-col overflow-hidden bg-white ">
       <div className="flex-1 overflow-y-auto px-2 py-4 ">
         <div className="mt-4">
           <div className="flow-root">
@@ -102,7 +102,7 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
                       <h3>
                         <Link to={`/books/${book._id}`}>{book.title}</Link>
                       </h3>
-                        <p className="absolute top-15 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
+                        <p className=" top-15 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
                     </div>
                     <p className="mt-1 text-sm text-gray-500 capitalize">
                       <strong>Category:</strong>

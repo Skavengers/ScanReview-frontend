@@ -1,37 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchBooksQuery } from '../../redux/features/books/booksApi';
-// Pass a query hook and category prop for flexibility
+
+// Custom hook for debounce
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
+}
+
 const ItemSearchBar = ({ category, onSelect }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [results, setResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // You need these hooks. Assume you have them defined:
-  // useSearchWebtoonsQuery, useSearchCharactersQuery
-  // Each returns { data, isLoading, error }
-  // Use whichever is appropriate for the category.
+  // Debounce search term to reduce API calls
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
+
+  // Choose the correct query hook based on category and debounced term
   const { data = [], isLoading, error } =
     category === 'webtoon'
-      ? useSearchBooksQuery(searchTerm, { skip: !searchTerm })
-      : useSearchCharactersQuery(searchTerm, { skip: !searchTerm });
+      ? useSearchBooksQuery(debouncedSearchTerm, { skip: !debouncedSearchTerm })
+      : useSearchCharactersQuery(debouncedSearchTerm, { skip: !debouncedSearchTerm });
 
+  // Show dropdown only when there is a debounced search term and results
   useEffect(() => {
-    if (searchTerm.trim().length > 0) {
-      setResults(data.slice(0, 5));
-      setShowDropdown(true);
-    } else {
-      setResults([]);
-      setShowDropdown(false);
-    }
-  }, [searchTerm, data]);
+    setShowDropdown(debouncedSearchTerm.trim().length > 0 && data.length > 0);
+  }, [debouncedSearchTerm, data]);
 
-  const handleChange = (e) => setSearchTerm(e.target.value);
+  // useCallback to memoize event handlers
+  const handleChange = useCallback((e) => {
+    setSearchTerm(e.target.value);
+  }, []);
 
-  const handleSelect = (item) => {
-    onSelect(item); // Pass back selected item (which contains id and anything else)
-    setSearchTerm(item.title);
+  const handleSelect = useCallback((item) => {
+    onSelect(item);
+    setSearchTerm(item.title || item.name);
     setShowDropdown(false);
-  };
+  }, [onSelect]);
 
   return (
     <div className="relative w-full">
@@ -45,9 +52,9 @@ const ItemSearchBar = ({ category, onSelect }) => {
       />
       {isLoading && <div className="text-xs mt-1">Loading...</div>}
       {error && <div className="text-xs text-red-500 mt-1">Error loading</div>}
-      {showDropdown && results.length > 0 && (
-        <ul className="absolute z-10 bg-white border rounded mt-1 w-full">
-          {results.map((item) => (
+      {showDropdown && (
+        <ul className="absolute z-10 bg-white border rounded mt-1 w-full max-h-60 overflow-auto">
+          {data.slice(0, 5).map((item) => (
             <li
               key={item._id}
               className="p-2 hover:bg-gray-100 cursor-pointer"

@@ -1,40 +1,41 @@
-import React, { useEffect } from 'react';
-import { 
-  useFetchListByIdQuery, 
-  useLikeListMutation, 
-  useViewListMutation 
-} from '../../redux/features/lists/listApiSlice';
+import React, { useMemo } from 'react';
+import { useFetchListByIdQuery, useLikeListMutation, useViewListMutation } from '../../redux/features/lists/listApiSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { IoMdCreate } from "react-icons/io";
 import { formatDistanceToNow } from 'date-fns';
 import { AiOutlineEye, AiOutlineLike } from "react-icons/ai";
+import BookCard from '../books/BookCard';
+import { useFetchBooksByIdsQuery } from '../../redux/features/books/booksApi';
+import { skipToken } from '@reduxjs/toolkit/query';
 
 const SingleListViewer = () => {
   const { currentUser } = useAuth() || {};
   const { id } = useParams();
-  const { data: list, isLoading, isError, refetch } = useFetchListByIdQuery(id);
+  const { data: list, isLoading, isError, isUninitialized, refetch } = useFetchListByIdQuery(id);
   const [likeList] = useLikeListMutation();
   const [viewList] = useViewListMutation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (id) {
-      viewList(id).then(() => {
-        refetch();
-      });
-    }
-  }, [id, viewList, refetch]);
+  // Always call hooks unconditionally
+  const bookIds = (list?.items ?? []).map(item => item.id).filter(Boolean);
+  const { data: books = [], isLoading: booksLoading } = useFetchBooksByIdsQuery(
+    bookIds.length > 0 ? bookIds : skipToken
+  );
 
-  const handleLike = async () => {
-    await likeList(id);
-    refetch();
-  };
+  // Memoize book lookup by ID
+  const bookMap = useMemo(() => {
+    const map = {};
+    books.forEach(book => { map[book._id] = book; });
+    return map;
+  }, [books]);
 
+  // Loading and error UI before accessing list properties
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Error loading list details</div>;
   if (!list) return <div className="text-center py-8">No list found.</div>;
 
+  // Safe to access list after ensuring it exists
   const createdAgo = formatDistanceToNow(new Date(list.createdAt));
   const updatedAgo = formatDistanceToNow(new Date(list.updatedAt));
 
@@ -49,8 +50,12 @@ const SingleListViewer = () => {
     }
   };
 
-  // Check if current user already liked the list
   const userHasLiked = currentUser && list.likedBy?.includes(currentUser.id);
+
+  const handleLike = async () => {
+    await likeList(id);
+    refetch();
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white shadow rounded">
@@ -78,20 +83,18 @@ const SingleListViewer = () => {
             disabled={userHasLiked}
             className={`flex items-center gap-1 ${userHasLiked ? 'text-gray-400 cursor-not-allowed' : 'hover:text-blue-600'}`}
           >
-            <AiOutlineLike className="text-lg" />
+            <AiOutlineLike className="text-lg" /> 
             {userHasLiked ? 'Liked' : list.likes}
           </button>
         ) : (
-          <span className="flex items-center gap-1 cursor-not-allowed opacity-60 " title="Login to like">
+          <span className="flex items-center gap-1 cursor-not-allowed opacity-60" title="Login to like">
             <AiOutlineLike className="text-lg" /> {list.likes}
           </span>
         )}
       </div>
 
       <div className="text-sm text-gray-500 mb-4">
-        {`List of ${list.items?.length || 0} ${getCategoryLabel(
-          list.category
-        )} · created ${createdAgo} ago · modified ${updatedAgo} ago`}
+        {`List of ${list.items?.length || 0} ${getCategoryLabel(list.category)} · created ${createdAgo} ago · modified ${updatedAgo} ago`}
       </div>
 
       <p className="mb-4 text-gray-700 break-words whitespace-normal">{list.description}</p>
@@ -104,12 +107,10 @@ const SingleListViewer = () => {
 
       <div className="mb-4">
         <h3 className="font-semibold mb-2">Tags:</h3>
-        {list.tags && list.tags.length > 0 ? (
+        {list.tags?.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {list.tags.map((tag, idx) => (
-              <span key={idx} className="px-2 py-1 bg-gray-200 rounded text-xs">
-                {tag}
-              </span>
+              <span key={idx} className="px-2 py-1 bg-gray-200 rounded text-xs">{tag}</span>
             ))}
           </div>
         ) : (
@@ -119,14 +120,24 @@ const SingleListViewer = () => {
 
       <div>
         <h3 className="font-semibold mb-2">Items:</h3>
-        {list.items && list.items.length > 0 ? (
-          <ul className="list-disc list-inside space-y-1">
-            {list.items.map((item, idx) => (
-              <li key={idx} className='break-words bg-gray-100 rounded-2xl m-2 p-2'>
-                <strong className='bg-primary m-1 rounded-full p-2'>{item.rank}.</strong> {item.id}{" "}
-                {item.explanation && `– ${item.explanation}`}
-              </li>
-            ))}
+        {list.items?.length > 0 ? (
+          <ul className="space-y-2">
+            {list.items.map((item, idx) => {
+              const book = bookMap[item.id];
+              return (
+                <li key={idx} className="p-2 border rounded bg-gray-50 flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <strong className="bg-primary rounded-full p-2">{item.rank}.</strong>
+                    {book ? (
+                      <BookCard book={book} haveDescription={false} />
+                    ) : (
+                      <div className="italic text-gray-500">Loading book info...</div>
+                    )}
+                  </div>
+                  {item.explanation && <div className="italic text-sm pl-12">{item.explanation}</div>}
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="text-gray-400 italic">No items</p>
