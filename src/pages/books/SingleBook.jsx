@@ -5,7 +5,7 @@ import SingleImageDisplay from '../../components/SingleImageDisplay';
 import { useFetchBookByIdQuery } from '../../redux/features/books/booksApi';
 import { useFetchUserInteractionsQuery, useSaveUserInteractionMutation } from '../../redux/features/userInteractions/userInteractionsApi';
 import { FaStar } from 'react-icons/fa';
-import TiltedCard from '../../components/TiltedCard';
+import TiltedCard from './TiltedCard';
 
 const SingleBook = () => {
   const { id } = useParams();

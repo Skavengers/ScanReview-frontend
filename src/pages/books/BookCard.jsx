@@ -22,11 +22,13 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
                   </div>
                   <div className="ml-4 flex flex-1 flex-col">
                     <div>
+                    <div className='relative'>
+                      <p className="absolute top-1 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
+                    </div>
                       <div className="flex flex-wrap justify-between text-base font-medium text-gray-900">
                         <h3>
                           <Link to={`/books/${book._id}`}>{book.title}</Link>
                         </h3>
-                        <p className=" top-15 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
                       </div>
                       <p className="mt-1 text-sm text-gray-500 capitalize">
                         <strong>Category:</strong>
@@ -98,11 +100,14 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
                 </div>
                 <div className="ml-4 flex flex-1 flex-col">
                   <div>
+                    <div className='relative'>
+                      <p className="absolute top-1 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
+                    </div>
                     <div className="flex flex-wrap justify-between text-base font-medium text-gray-900">
                       <h3>
                         <Link to={`/books/${book._id}`}>{book.title}</Link>
                       </h3>
-                        <p className=" top-15 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
+                        
                     </div>
                     <p className="mt-1 text-sm text-gray-500 capitalize">
                       <strong>Category:</strong>
