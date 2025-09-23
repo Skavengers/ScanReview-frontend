@@ -40,13 +40,13 @@ const Footer = () => {
 
         {/* Right Side - Social Icons */}
         <div className="flex gap-6">
-          <a href="https://www.youtube.com/@ScanReview-tobeornottobe" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+          <a href="https://www.youtube.com/@AManhwaFan" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
             <FaYoutube size={24} />
           </a>
-          <a href="https://www.instagram.com/scan.review/" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+          <a href="https://www.instagram.com/amanhwafan/" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
             <FaInstagram size={24} />
           </a>
-          <a href="https://www.tiktok.com/@scan.review0" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+          <a href="https://www.tiktok.com/@amanhwafan" target="_blank" rel="noopener noreferrer" className="hover:text-primary">
             <FaTiktok  size={24} />
           </a>
         </div>
