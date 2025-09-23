@@ -6,6 +6,11 @@ import { useFetchBookByIdQuery } from '../../redux/features/books/booksApi';
 import { useFetchUserInteractionsQuery, useSaveUserInteractionMutation } from '../../redux/features/userInteractions/userInteractionsApi';
 import { FaStar } from 'react-icons/fa';
 import TiltedCard from './TiltedCard';
+import {
+  useFetchCommentsByBookQuery,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
+} from '../../redux/features/comments/commentsApi';
 
 const SingleBook = () => {
   const { id } = useParams();
@@ -26,6 +31,19 @@ const SingleBook = () => {
   const [error, setError] = useState('');
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
   const [hoveredRating, setHoveredRating] = useState(null);
+  const {
+    data: comments = [],
+    isLoading: isLoadingComments,
+    isError: isErrorComments,
+    refetch: refetchComments,
+  } = useFetchCommentsByBookQuery(id);
+
+  const [addComment, { isLoading: isAddingComment }] = useAddCommentMutation();
+  const [deleteComment] = useDeleteCommentMutation();
+
+  const [commentInput, setCommentInput] = useState("");
+  const [commentError, setCommentError] = useState("");
+
   // Synchronize local state from fetched user interaction
   useEffect(() => {
     if (userInteraction.length > 0) {
@@ -41,7 +59,7 @@ const SingleBook = () => {
       setIsFavorite(false);
     }
   }, [userInteraction]);
-
+  
   // Unified save handler for interaction fields including favorite
   const saveInteraction = async (fieldsToUpdate) => {
     if (!currentUser) {
@@ -102,6 +120,35 @@ const SingleBook = () => {
   const toggleFavoriteHandler = async () => {
     await saveInteraction({ favorite: !isFavorite });
   };
+
+  const handleAddComment = async () => {
+  if (!currentUser) {
+    setCommentError("You must be logged in to comment.");
+    return;
+  }
+  if (!commentInput.trim()) {
+    setCommentError("Comment cannot be empty.");
+    return;
+  }
+  try {
+    await addComment({
+      userId: currentUser.uid,
+      bookId: id,
+      comment: commentInput.trim(),
+      type: "book",
+    });
+    setCommentInput("");
+    setCommentError("");
+    refetchComments();
+  } catch (err) {
+    setCommentError("Failed to post comment.");
+  }
+};
+
+const handleDeleteComment = async (commentId) => {
+  await deleteComment(commentId);
+  refetchComments();
+};
 
   if (isBookLoading || (currentUser && isLoadingInteraction)) return <div>Loading...</div>;
   if (isBookError) return <div>Error loading book info.</div>;
@@ -296,6 +343,53 @@ const SingleBook = () => {
             ))}
           </div>
         </div>
+      </div>
+      <div className="max-w-6xl mx-auto mt-8 bg-white rounded-xl shadow-md p-4">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Public Comments</h2>
+        {isLoadingComments ? (
+          <div>Loading comments...</div>
+        ) : isErrorComments ? (
+          <div>Error loading comments.</div>
+        ) : (
+          <ul className="space-y-3">
+            {comments.map((comment) => (
+              <li key={comment._id} className="p-2 border rounded bg-gray-50">
+                <span className="font-semibold">{comment.userId}</span>
+                <span className="block text-gray-700">{comment.comment}</span>
+                <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span>
+                {currentUser?.uid === comment.userId && (
+                  <button
+                    onClick={() => handleDeleteComment(comment._id)}
+                    className="ml-2 px-2 py-1 text-xs text-red-600"
+                  >
+                    Delete
+                  </button>
+                )}
+              </li>
+            ))}
+            {comments.length === 0 && <div>No comments yet.</div>}
+          </ul>
+        )}
+        {currentUser && (
+          <div className="mt-4 flex flex-col gap-2">
+            <textarea
+              className="border rounded p-2 w-full"
+              value={commentInput}
+              onChange={(e) => setCommentInput(e.target.value)}
+              rows={2}
+              placeholder="Add your comment"
+            />
+            <button
+              className="bg-indigo-600 text-white px-4 py-2 rounded"
+              onClick={handleAddComment}
+              disabled={isAddingComment}
+            >
+              {isAddingComment ? "Posting..." : "Post Comment"}
+            </button>
+            {commentError && <div className="text-red-500 text-xs">{commentError}</div>}
+          </div>
+        )}
+        {!currentUser && <div className="text-gray-500 text-xs mt-2">Login to leave a comment.</div>}
       </div>
     </div>
   );
