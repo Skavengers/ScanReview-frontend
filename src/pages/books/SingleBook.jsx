@@ -134,6 +134,7 @@ const SingleBook = () => {
     await addComment({
       userId: currentUser.uid,
       bookId: id,
+      userDisplayName: currentUser.displayName,
       comment: commentInput.trim(),
       type: "book",
     });
@@ -354,7 +355,7 @@ const handleDeleteComment = async (commentId) => {
           <ul className="space-y-3">
             {comments.map((comment) => (
               <li key={comment._id} className="p-2 border rounded bg-gray-50">
-                <span className="font-semibold">{comment.userId}</span>
+                <span className="font-semibold">{comment.userDisplayName || comment.userId}</span>
                 <span className="block text-gray-700">{comment.comment}</span>
                 <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span>
                 {currentUser?.uid === comment.userId && (

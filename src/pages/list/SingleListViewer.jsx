@@ -48,6 +48,7 @@ const SingleListViewer = () => {
       await addComment({
         userId: currentUser.uid,
         listId: id,
+        userDisplayName: currentUser.displayName,
         comment: commentText.trim(),
         type: "list",
       });
@@ -194,7 +195,7 @@ const SingleListViewer = () => {
           <ul>
             {comments.map((comment) => (
               <li key={comment._id} className="border-b pb-2">
-                <span className="font-semibold">{comment.userId}</span>
+                <span className="font-semibold">{comment.userDisplayName || comment.userId}</span>
                 {" — "}
                 <span>{comment.comment}</span>
                 {" "}
