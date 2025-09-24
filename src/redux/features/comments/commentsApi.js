@@ -32,6 +32,7 @@ const commentsApi = createApi({
         method: 'POST',
         body: data,
       }),
+      // Fix typo here: "ListId" --> "listId" (case-sensitive)
       invalidatesTags: (result, error, { bookId, listId, type }) => {
         if (type === 'book') return [{ type: 'Comments', id: bookId }];
         if (type === 'list') return [{ type: 'Comments', id: listId }];

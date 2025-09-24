@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useFetchListByIdQuery, useLikeListMutation, useViewListMutation } from '../../redux/features/lists/listApiSlice';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -8,45 +8,85 @@ import { AiOutlineEye, AiOutlineLike } from "react-icons/ai";
 import BookCard from '../books/BookCard';
 import { useFetchBooksByIdsQuery } from '../../redux/features/books/booksApi';
 import { skipToken } from '@reduxjs/toolkit/query';
+import {
+  useFetchCommentsByListQuery,
+  useAddCommentMutation,
+  useDeleteCommentMutation,
+} from '../../redux/features/comments/commentsApi';
 
 const SingleListViewer = () => {
   const { currentUser } = useAuth() || {};
   const { id } = useParams();
-  const { data: list, isLoading, isError, isUninitialized, refetch } = useFetchListByIdQuery(id);
+  const { data: list, isLoading, isError, refetch } = useFetchListByIdQuery(id);
   const [likeList] = useLikeListMutation();
   const [viewList] = useViewListMutation();
   const navigate = useNavigate();
 
-  // Always call hooks unconditionally
+  const {
+    data: comments = [],
+    isLoading: isCommentsLoading,
+    isError: isCommentsError,
+    refetch: refetchComments,
+  } = useFetchCommentsByListQuery(id);
+
+  const [addComment] = useAddCommentMutation();
+  const [deleteComment] = useDeleteCommentMutation();
+
+  const [commentText, setCommentText] = useState("");
+  const [commentError, setCommentError] = useState("");
+
+  const handleAddComment = async () => {
+    if (!currentUser) {
+      setCommentError("You must be logged in to comment.");
+      return;
+    }
+    if (!commentText.trim()) {
+      setCommentError("Comment cannot be empty.");
+      return;
+    }
+    try {
+      await addComment({
+        userId: currentUser.uid,
+        listId: id,
+        comment: commentText.trim(),
+        type: "list",
+      });
+      setCommentText("");
+      setCommentError("");
+      refetchComments();
+    } catch (error) {
+      setCommentError("Failed to post comment.");
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    await deleteComment(commentId);
+    refetchComments();
+  };
+
   const bookIds = (list?.items ?? []).map(item => item.id).filter(Boolean);
-  const { data: books = [], isLoading: booksLoading } = useFetchBooksByIdsQuery(
+  const { data: books = [] } = useFetchBooksByIdsQuery(
     bookIds.length > 0 ? bookIds : skipToken
   );
 
-  // Memoize book lookup by ID
   const bookMap = useMemo(() => {
     const map = {};
     books.forEach(book => { map[book._id] = book; });
     return map;
   }, [books]);
 
-  // Loading and error UI before accessing list properties
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Error loading list details</div>;
   if (!list) return <div className="text-center py-8">No list found.</div>;
 
-  // Safe to access list after ensuring it exists
   const createdAgo = formatDistanceToNow(new Date(list.createdAt));
   const updatedAgo = formatDistanceToNow(new Date(list.updatedAt));
 
   const getCategoryLabel = (category) => {
     switch (category) {
-      case 'webtoon':
-        return 'webtoons';
-      case 'character':
-        return 'characters';
-      default:
-        return category;
+      case 'webtoon': return 'webtoons';
+      case 'character': return 'characters';
+      default: return category;
     }
   };
 
@@ -83,7 +123,7 @@ const SingleListViewer = () => {
             disabled={userHasLiked}
             className={`flex items-center gap-1 ${userHasLiked ? 'text-gray-400 cursor-not-allowed' : 'hover:text-blue-600'}`}
           >
-            <AiOutlineLike className="text-lg" /> 
+            <AiOutlineLike className="text-lg" />
             {userHasLiked ? 'Liked' : list.likes}
           </button>
         ) : (
@@ -141,6 +181,56 @@ const SingleListViewer = () => {
           </ul>
         ) : (
           <p className="text-gray-400 italic">No items</p>
+        )}
+      </div>
+
+      <div className="mt-6 bg-white rounded shadow p-4">
+        <h2 className="font-semibold mb-2">Public Comments</h2>
+        {isCommentsLoading ? (
+          <div>Loading comments...</div>
+        ) : isCommentsError ? (
+          <div>Error loading comments.</div>
+        ) : (
+          <ul>
+            {comments.map((comment) => (
+              <li key={comment._id} className="border-b pb-2">
+                <span className="font-semibold">{comment.userId}</span>
+                {" — "}
+                <span>{comment.comment}</span>
+                {" "}
+                <span className="text-xs text-gray-400">{new Date(comment.createdAt).toLocaleString()}</span>
+                {currentUser?.uid === comment.userId && (
+                  <button
+                    onClick={() => handleDeleteComment(comment._id)}
+                    className="ml-4 text-red-500 text-xs"
+                  >
+                    Delete
+                  </button>
+                )}
+              </li>
+            ))}
+            {comments.length === 0 && <li>No comments yet.</li>}
+          </ul>
+        )}
+        {currentUser ? (
+          <div>
+            <textarea
+              className="border rounded w-full p-2"
+              rows={2}
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Leave a comment..."
+            />
+            {commentError && <div className="text-red-500 text-xs">{commentError}</div>}
+            <button
+              className="mt-2 px-3 py-1 bg-indigo-600 text-white rounded"
+              onClick={handleAddComment}
+            >
+              Post Comment
+            </button>
+          </div>
+        ) : (
+          <div className="text-gray-500 text-xs mt-2">Login to leave a comment.</div>
         )}
       </div>
     </div>
