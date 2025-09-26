@@ -17,7 +17,7 @@ import UpdateBook from "../pages/dashboard/editBook/UpdateBook";
 import ListViewer from "../pages/list/ListViewer";
 import SingleListViewer from "../pages/list/SingleListViewer";
 import ModifyList from "../pages/list/ModifyList";
-import InteractedBooksSection from "../pages/home/InteractedBookSection";
+import InteractedBooksSection from "../pages/profile/InteractedBookSection";
 const router = createBrowserRouter([
     {
         path: "/",

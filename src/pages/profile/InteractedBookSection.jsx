@@ -9,6 +9,7 @@ import { useFetchBooksByIdsQuery } from '../../redux/features/books/booksApi';
 import BookCard from '../books/BookCard';
 import { useAuth } from '../../context/AuthContext';
 import { skipToken } from '@reduxjs/toolkit/query';
+import UserStats from './userStats';
 
 const filterOptions = [
   { label: "All", value: "all" },
@@ -53,6 +54,7 @@ const InteractedBooksSection = () => {
 
   return (
     <div className="py-10">
+      <UserStats />
       <h2 className="text-3xl font-semibold mb-6">Your Books</h2>
       {sections.map((section) => (
         <div key={section.value} className="mb-10">

@@ -56,12 +56,11 @@ const ModifyList = () => {
           isPublic: data.isPublic ?? true,
         };
       });
-    
+
       const maxRank = Math.max(0, ...data.items.map(item => item.rank || 0));
       setNewItem({ id: '', rank: maxRank + 1, explanation: '' });
     }
   }, [data]);
-
 
   // Fetch full book details for all items
   const bookIds = formData.items.map(item => item.id).filter(Boolean);
@@ -120,7 +119,33 @@ const ModifyList = () => {
   const handleRemoveItem = (index) => {
     const updatedItems = [...formData.items];
     updatedItems.splice(index, 1);
-    setFormData(prev => ({ ...prev, items: updatedItems }));
+    // Update ranks after removal
+    const updatedRanks = updatedItems.map((item, idx) => ({ ...item, rank: idx + 1 }));
+    setFormData(prev => ({ ...prev, items: updatedRanks }));
+  };
+
+  // Move item up
+  const moveItemUp = (index) => {
+    if (index === 0) return; // Already first
+    setFormData(prev => {
+      const newItems = [...prev.items];
+      [newItems[index - 1], newItems[index]] = [newItems[index], newItems[index - 1]];
+      // Update ranks
+      const updatedRanks = newItems.map((item, idx) => ({ ...item, rank: idx + 1 }));
+      return { ...prev, items: updatedRanks };
+    });
+  };
+
+  // Move item down
+  const moveItemDown = (index) => {
+    if (index === formData.items.length - 1) return; // Already last
+    setFormData(prev => {
+      const newItems = [...prev.items];
+      [newItems[index], newItems[index + 1]] = [newItems[index + 1], newItems[index]];
+      // Update ranks
+      const updatedRanks = newItems.map((item, idx) => ({ ...item, rank: idx + 1 }));
+      return { ...prev, items: updatedRanks };
+    });
   };
 
   // Submit updated list
@@ -260,6 +285,27 @@ const ModifyList = () => {
                   <div className="italic text-gray-500">Loading book info...</div>
                 )}
                 <div className="italic text-sm">{item.explanation}</div>
+
+                <button
+                  type="button"
+                  disabled={index === 0}
+                  onClick={() => moveItemUp(index)}
+                  className="text-blue-600 disabled:text-gray-400"
+                  aria-label="Move item up"
+                >
+                  ↑
+                </button>
+
+                <button
+                  type="button"
+                  disabled={index === formData.items.length - 1}
+                  onClick={() => moveItemDown(index)}
+                  className="text-blue-600 disabled:text-gray-400"
+                  aria-label="Move item down"
+                >
+                  ↓
+                </button>
+
                 <button type="button" onClick={() => handleRemoveItem(index)} className="text-red-500">
                   Remove
                 </button>

@@ -310,7 +310,7 @@ const handleDeleteComment = async (commentId) => {
         )}
         {currentUser && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Your Notes</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Your Private Notes</h2>
             <textarea
               className="mt-2 w-full p-2 border rounded text-xs"
               value={userNote}
@@ -327,9 +327,6 @@ const handleDeleteComment = async (commentId) => {
           </div>
         )}
         <div>
-          <div className="flex items-center gap-2 mb-4">
-            <h1 className="text-lg font-bold">{book.title}</h1>
-          </div>
           <h2 className="text-lg font-semibold text-gray-900">Your Reading Status</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {['reading', 'completed', 'on_hold', 'dropped', 'plan_to_read'].map((status) => (
