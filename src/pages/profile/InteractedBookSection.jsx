@@ -31,18 +31,15 @@ const InteractedBooksSection = () => {
   const userId = currentUser.uid;
   const { data: interactions = [], isLoading, isError } = useFetchUserInteractionsQuery({ userId });
 
-  // Prepare filtered books and book data for each filter
   const sections = filterOptions.map(opt => {
     const filtered = filterInteractions(interactions, opt.value);
     const bookIds = filtered.map(i => i.bookId).filter(Boolean);
     return { ...opt, bookIds };
   });
 
-  // Combine all unique bookIds to fetch at once
   const allBookIds = Array.from(new Set(sections.flatMap(s => s.bookIds)));
   const { data: books = [], isLoading: booksLoading } = useFetchBooksByIdsQuery(allBookIds.length ? allBookIds : skipToken);
 
-  // Match bookId to book object
   const bookMap = useMemo(() => {
     const map = {};
     books.forEach(book => { map[book._id] = book; });
