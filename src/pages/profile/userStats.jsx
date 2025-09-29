@@ -1,13 +1,10 @@
 import React, { useMemo } from 'react';
-
-// Assume logic for fetching interactions and books as previously provided
 import { useAuth } from '../../context/AuthContext';
 import { useFetchUserInteractionsQuery } from '../../redux/features/userInteractions/userInteractionsApi';
 import { useFetchBooksByIdsQuery } from '../../redux/features/books/booksApi';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { getStatusCounts, getGenreStatusCounts } from '../../utils/userStats';
 
-// Status colors
 const STATUS_COLORS = {
   reading: '#2D9CDB',
   completed: '#27AE60',
