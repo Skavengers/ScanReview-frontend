@@ -11,62 +11,63 @@ const BookCard = ({ book, isTierList = true, haveDescription = true }) => {
   if (!currentUser) {
     // Not connected: render only non-user-dependent fields
     return (
-      <div className=" mt-10 h-full flex-col hidden bg-white  ">
-        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">
-          <div className="mt-4">
-            <div className="flow-root">
-              <ul role="list" className="-my-4 divide-y divide-gray-200">
-                <li className="flex">
-                  <div className="h-28 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 mb-0.5">
-                    <SingleImageDisplay pictureUrl={book.picture_url} className="h-full w-full object-cover object-center" />
-                  </div>
-                  <div className="ml-4 flex flex-1 flex-col">
-                    <div>
+    <div className="flex mt-5 h-full flex-col overflow-hidden bg-white ">
+      <div className="flex-1 overflow-y-auto px-2 py-4 ">
+        <div className="mt-4">
+          <div className="flow-root">
+            <ul role="list" className="-my-4 divide-y divide-gray-200">
+              <li className="flex">
+                <div className="h-28 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200 mb-0.5">
+                  <SingleImageDisplay pictureUrl={book.picture_url} className="h-full w-full object-cover object-center" />
+                </div>
+                <div className="ml-4 flex flex-1 flex-col">
+                  <div>
                     <div className='relative'>
                       <p className="absolute top-1 right-1 -mt-4 mr-2 text-sm text-gray-500">{book.meta?.status}</p>
                     </div>
-                      <div className="flex flex-wrap justify-between text-base font-medium text-gray-900">
-                        <h3>
-                          <Link to={`/books/${book._id}`}>{book.title}</Link>
-                        </h3>
-                      </div>
-                      <p className="mt-1 text-sm text-gray-500 capitalize">
-                        <strong>Category:</strong>
-                        {(book.genres ?? []).slice(0, 6).map((g, i, array) => (
-                          <span key={i}>
-                            {g}
-                            {i < array.length - 1 ? ', ' : ''}
-                          </span>
-                        ))}
-                      </p>
+                    <div className="flex flex-wrap justify-between text-base font-medium text-gray-900">
+                      <h3>
+                        <Link to={`/books/${book._id}`}>{book.title}</Link>
+                      </h3>
+                        
                     </div>
-                    <div className="flex flex-1 flex-wrap items-end justify-between space-y-2 text-sm">
-                      <p className="text-gray-500">
-                        <strong>Origin:</strong> {book?.origin_country}
-                      </p>
-                      <div className="flex">
-                        {/*<button type="button" className="font-medium text-indigo-600 hover:text-indigo-500" disabled>
-                          {book.stats.average_rating == 0 ? 'not rated' : book.stats.average_rating}
-                        </button>*/}
-                      </div>
+                    <p className="mt-1 text-sm text-gray-500 capitalize">
+                      <strong>Category:</strong>
+                      {(book.genres ?? []).slice(0, 6).map((g, i, array) => (
+                        <span key={i}>
+                          {g}
+                          {i < array.length - 1 ? ', ' : ''}
+                        </span>
+                      ))}
+                    </p>
+                  </div>
+                  <div className="flex flex-1 flex-wrap items-end justify-between space-y-2 text-sm">
+                    <p className="text-gray-500">
+                      <strong>Origin:</strong> {book?.origin_country}
+                    </p>
+                    <div className="flex">
+                      <button type="button" className="font-medium text-indigo-600 hover:text-indigo-500">
+                        {/*book.stats.average_rating == 0 ? 'not rated' : book.stats.average_rating*/}
+                      </button>
                     </div>
                   </div>
-                </li>
-              </ul>
-            </div>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
-        {haveDescription &&
-          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-            <div className="flex justify-between text-base font-medium text-gray-900">
-              <p>Descriptions</p>
-            </div>
-            <p className="mt-0.5 text-sm text-gray-500">
-              {book.description.length > 200 ? `${book?.description.slice(0, 200)}...` : book.description}
-            </p>
-          </div>
-        }
       </div>
+      {haveDescription &&
+        <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+          <div className="flex justify-between text-base font-medium text-gray-900">
+            <p>Descriptions</p>
+          </div>
+          <p className="mt-0.5 text-sm text-gray-500">
+            {book.description.length > 200 ? `${book?.description.slice(0, 200)}...` : book.description}
+          </p>
+        </div>
+      }
+    </div>
     );
   }
 

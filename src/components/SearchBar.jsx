@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 const BookCard = ({ book}) => {
 
   return (
-    <div className="flex w-full flex-col overflow-hidden bg-white shadow-xl">
+    <div className="flex w-full flex-col overflow-hidden bg-white shadow-xl hover:bg-gray-200">
       <div className="flex-1 overflow-y-auto px-1 py-1 sm:px-6">
 
         <div className="">
@@ -149,7 +149,7 @@ const SearchBar = () => {
         {isLoading && <p className="mt-1 text-sm text-gray-500">Loading...</p>}
         {error && <p className="mt-1 text-sm text-red-500">Error fetching search results</p>}
         {suggestions.length > 0 && (
-<ul className="absolute z-30 mt-1 w-full max-w-none rounded-md overflow-y-auto bg-white ">
+<ul className="absolute z-30 mt-1 left-1/2 -translate-x-1/2 min-w-[500px] rounded-md overflow-y-auto bg-white shadow-lg">
   {suggestions.map((book) => (
     <li
       key={book._id}
