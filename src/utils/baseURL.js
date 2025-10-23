@@ -1,5 +1,5 @@
 const getBaseUrl = () => {
-    return "https://openapi.vercel.sh/vercel.json"
+    return "https://scan-review-backend.vercel.app"
 }
 
 export default getBaseUrl;
