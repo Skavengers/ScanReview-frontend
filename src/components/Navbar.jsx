@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import SearchBar from './SearchBar';
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard" },
+//  { name: "Dashboard", href: "/dashboard" },
   { name: "Tier List", href: "/lists" },
   { name: "Random Manhwa", href: "/books/revenge_of_the_iron-blooded_sword_hound" },
   { name: "Collection", href: "/collection" },
