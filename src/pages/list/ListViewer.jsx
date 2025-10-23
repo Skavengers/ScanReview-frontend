@@ -6,7 +6,7 @@ import { LuRefreshCw } from "react-icons/lu";
 import { IoMdCreate } from "react-icons/io";
 import InitList from './InitList';
 import { useAuth } from '../../context/AuthContext';
-
+import CommunityListBar from './CommunityListBar';
 const ListViewer = () => {
   const [showInitList, setShowInitList] = useState(false);
   const [authWarning, setAuthWarning] = useState('');
@@ -104,6 +104,7 @@ const ListViewer = () => {
           </Link>
         ))}
       </div>
+      {/*<CommunityListBar category="webtoon" subject="YourSubjectHere" />*/}
     </div>
   );
 };

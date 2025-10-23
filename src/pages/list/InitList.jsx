@@ -1,4 +1,3 @@
-// InitList.jsx
 import React, { useState } from 'react';
 import { useCreateListMutation } from '../../redux/features/lists/listApiSlice';
 import { useAuth } from '../../context/AuthContext';

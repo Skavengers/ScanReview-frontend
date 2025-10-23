@@ -3,7 +3,6 @@ import App from "../App";
 import Home from "../pages/home/Home";
 import Login from "../components/Login";
 import Register from "../components/Register";
-//import CartPage from "../pages/books/CartPage";
 import SingleBook from "../pages/books/SingleBook";
 import PrivateRoute from "./PrivateRoute";
 import AdminRoute from "./AdminRoute";
@@ -18,6 +17,8 @@ import ListViewer from "../pages/list/ListViewer";
 import SingleListViewer from "../pages/list/SingleListViewer";
 import ModifyList from "../pages/list/ModifyList";
 import InteractedBooksSection from "../pages/profile/InteractedBookSection";
+import CommunityInitList from "../pages/list/CommunityInitList";
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -51,6 +52,9 @@ const router = createBrowserRouter([
             {
                 path: "/lists",
                 element: <ListViewer />
+            },{
+                path: "/lists/create-list",
+                element: <CommunityInitList />
             },
             {
                 path: "/lists/modify-list/:id",
